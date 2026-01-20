@@ -41,7 +41,7 @@ from vllm.v1.core.sched.scheduler import Scheduler
 from vllm.v1.core.sched.utils import check_stop, remove_all
 from vllm.v1.engine import (EngineCoreEventType, EngineCoreOutput,
                             EngineCoreOutputs, FinishReason)
-from vllm.v1.outputs import ModelRunnerOutput
+from vllm.v1.outputs import KVConnectorOutput, ModelRunnerOutput
 from vllm.v1.request import Request, RequestStatus
 from vllm.v1.spec_decode.metrics import SpecDecodingStats
 from vllm.v1.utils import ConstantList, record_function_or_nullcontext
@@ -833,6 +833,42 @@ class RecomputeScheduler(Scheduler):
             eco.scheduler_stats = stats
 
         return engine_core_outputs
+    
+    def _free_blocks_by_request_id(self, request_id: str):
+
+        logger.warning(f"Freeing orphaned KV cache for request {request_id}")
+        self.kv_cache_manager.coordinator.free(request_id)
+        logger.info(f"Successfully freed orphaned KV cache for request {request_id}")
+
+    def _update_from_kv_xfer_finished(self, kv_connector_output: KVConnectorOutput):
+        """
+        KV Connector: update the scheduler state based on the output.
+
+        The Worker side connectors add finished_recving and
+        finished_sending reqs to the output.
+        * if finished_sending: free the blocks
+        # if finished_recving: add to state so we can
+            schedule the request during the next step.
+        """
+
+        if self.connector is not None:
+            self.connector.update_connector_output(kv_connector_output)
+
+        # KV Connector:: update recv and send status from last step.
+        for req_id in kv_connector_output.finished_recving or ():
+            logger.debug("Finished recving KV transfer for request %s", req_id)
+            self.finished_recving_kv_req_ids.add(req_id)
+        for req_id in kv_connector_output.finished_sending or ():
+            logger.debug("Finished sending KV transfer for request %s", req_id)
+            # assert req_id in self.requests
+            if req_id not in self.requests:
+                logger.warning(
+                    f"Request {req_id} not found in scheduler during KV finished_sending! "
+                    f"This may be due to request completion before KV transfer finished."
+                )
+                self._free_blocks_by_request_id(req_id)
+                continue
+            self._free_blocks(self.requests[req_id])
 
 
 class AsyncRecomputeScheduler(AsyncScheduler, RecomputeScheduler):
