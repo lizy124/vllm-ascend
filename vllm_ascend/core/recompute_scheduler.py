@@ -860,7 +860,6 @@ class RecomputeScheduler(Scheduler):
             self.finished_recving_kv_req_ids.add(req_id)
         for req_id in kv_connector_output.finished_sending or ():
             logger.debug("Finished sending KV transfer for request %s", req_id)
-            # assert req_id in self.requests
             if req_id not in self.requests:
                 logger.warning(
                     f"Request {req_id} not found in scheduler during KV finished_sending! "
