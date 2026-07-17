@@ -1,0 +1,104 @@
+软件编码与重构举证材料清单
+
+累计总新增 6000+ 行，覆盖 88 个文件，其中开发代码约 2400 行，测试代码约 3600 行。
+
+一、KV Cache 池化异步写
+
+PR: https://gitcode.com/Ascend/MindIE-LLM/pull/705
+
+主要改动：
+  - 新增 MemPoolType 枚举：DISABLED / SYNC_WRITE / ASYNC_WRITE，替代魔数
+  - 新增 EventManager 类：RecordEvent() / WaitEvent() 方法，Event 循环队列（4 个 Event 池化复用）
+  - 修改 Prefix Cache 读写路径，支持异步写模式
+  - 明确特性组合约束：支持 Prefix Cache / Context Parallel / Sequence Parallel，不支持 SplitFuse / Micro Batch / Multi-Lora
+
+语言：C++
+
+二、环境变量配置迁移
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/9064
+
+主要改动文件：
+  - vllm_ascend/ascend_config.py
+    + _get_config_value() 静态方法（两级优先级：additional_config > 环境变量）
+    + 10 个配置 getter：enable_mlapo、enable_compile_cache、enable_flashcomm1 等
+  - vllm_ascend/flash_attention.py
+    修改 enable_flashcomm1 读取路径（三级 fallback：AscendConfig > 环境变量 > 默认值）
+  - vllm_ascend/profiler.py
+    修改 msprof 相关配置读取路径
+  - vllm_ascend/msmonitor.py
+    修改 MSMonitor_USE_DAEMON 读取路径（suppress 兜底模式）
+
+语言：Python
+
+官方用户文档：https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/additional_config.html
+
+后续消债计划：
+  RFC: https://github.com/vllm-project/vllm-ascend/issues/10381
+  发起 RFC 提案，计划在下一个版本中移除 10 个已废弃环境变量的 fallback 逻辑及相关代码，完成迁移闭环，消除历史债务。
+
+三、Layerwise KV Cache Events
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/9468
+
+主要改动文件：
+  - vllm_ascend/distributed/ascend/kv_transfer.py
+    + KVCacheStoreLayerSendingThread 类（继承 KVTransferThread，负责发送端按层存储）
+    + KVCacheStoreLayerRecvingThread 类（继承 KVTransferThread，负责接收端）
+    + layerwise_event_starts 数据结构（按 module_id-layer 存储累积信息）
+    + layerwise_event_lock 独立锁
+    + 默认关闭，通过 LAYER_WISE_KV_CACHE_EVENTS 环境变量控制
+
+语言：Python
+
+四、日志质量改进
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/10086
+
+改动统计：17 个文件，+429 / -186 行
+
+主要改动文件：
+  - vllm_ascend/platform.py（日志级别修正、添加组件标识、优化提示信息）
+  - vllm_ascend/compilation/（ac_set_amp_mode.py、acl_compile.py 等，统一日志格式）
+  - vllm_ascend/distributed/ascend/kv_transfer.py（日志参数化、添加 type/error 快照）
+  - vllm_ascend/ops/naive_attention.py（日志级别修正）
+  - vllm_ascend/ops/patch_precision.py（日志参数化）
+  - 其他 12 个文件（统一日志风格）
+
+整改标准（log-quality-standard）：
+  1. 使用 %s 占位符，禁止 f-string
+  2. 包含关键上下文 parameter=value
+  3. 异常日志附带 type/error 快照
+  4. 错误日志包含排查建议
+  5. 组件标识 [ComponentName] 前缀
+  6. 日志级别正确（正常 INFO，异常 WARNING/ERROR，调试 DEBUG）
+  7. 循环内日志 DEBUG 级别
+  8. 禁止打印敏感信息
+
+语言：Python
+
+改动梳理：https://github.com/lizy124/vllm-ascend/blob/tmp_br/documents/logger/logger_quality_branch_changes.md
+  （15 个文件逐条 before/after 对比，含参数格式改进、消息简化、排查方向添加等类别）
+
+五、独立日志系统
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/10262
+     https://github.com/vllm-project/vllm-ascend/pull/10306
+
+主要改动文件：
+  - vllm_ascend/ascend_logging.py（新增）
+    + AscendFormatter 类（模块名自动推断、[vllm-ascend] [module] 前缀）
+    + RotatingAscendFileHandler 类（20MB 轮转、旧日志清理）
+    + _is_ascend_module() 函数（路径判断）
+    + _infer_module_name() 函数（模块名推断：根目录/子目录/非 Ascend 模块）
+    + setup_file_logging() 函数（同时挂载到 vllm 和 vllm_ascend logger）
+  - vllm_ascend/__init__.py（导入 setup_file_logging，插件入口调用）
+  - vllm_ascend/distributed/ascend/kv_transfer.py（logger 切换到 vllm_ascend namespace）
+  - vllm_ascend/utils.py（logger 切换到 vllm_ascend namespace）
+
+架构要点：
+  - 独立 Logger Namespace：vllm_ascend，与 vllm 核心隔离（propagate=False）
+  - FileHandler 双挂载：同时挂到 vllm 和 vllm_ascend，完整捕获两类日志
+  - 模块名自动推断：从文件路径提取，支持根目录和子目录
+
+语言：Python

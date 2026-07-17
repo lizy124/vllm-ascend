@@ -1,0 +1,60 @@
+软件工程与突出贡献举证材料清单
+
+一、工程方法 —— 举证材料对照
+
+1. 日志标准化体系（log-quality-standard）
+
+   来源项目：logger（日志质量改进）
+   举证材料：
+     - 规范原文：详见 软件设计/logger/design_doc.md（第 2 章：整改标准）
+     - 8 项核心标准：占位符规范、关键上下文、异常快照、排查建议、组件标识、级别正确、防刷屏、隐私保护
+     - 4 个配套 Skill：scan-code（扫描）、write（编写）、rewrite（改写）
+     - 落地效果：17 个文件按标准统一整改，+429/-186 行
+     - PR：https://github.com/vllm-project/vllm-ascend/pull/10086
+
+2. 配置迁移标准化范式
+
+   来源项目：env_config（环境变量配置迁移）
+   举证材料：
+     - 范式代码：软件设计/env_config/design_doc.md（第 3 章：_get_config_value 设计）
+     - 开发者指南：design_doc.md 中"添加新配置项"章节（3 步流程 + 测试模板）
+     - 两级优先级机制：additional_config > 环境变量 > 默认值
+     - 弃用警告机制：过渡期兼容旧环境变量并输出迁移提示
+     - PR：https://github.com/vllm-project/vllm-ascend/pull/9064
+
+3. 设计文档标准化交付物
+
+   来源项目：全部 5 个项目
+   举证材料（均位于 软件设计/ 下）：
+     - async_pool/design_doc.md + 01_类图.png + 02_异步写完整流程.png
+     - env_config/design_doc.md + 02_配置迁移完整流程.png
+     - kv event/design_doc.md + 01_类图.png + 02_累积Event时序图.png
+     - logger/design_doc.md
+     - logger_store/design_doc.md + 01_类图.png + 03_日志系统时序图.png
+   文档覆盖章节：背景动机、数据结构、核心流程、线程模型、错误处理、测试验证
+
+4. 独立日志系统工程化
+
+   来源项目：logger_store（独立日志系统）
+   举证材料：
+     - 架构设计：软件设计/logger_store/design_doc.md
+     - 核心机制：独立 Logger Namespace（vllm_ascend）、propagate=False 隔离
+     - 自动模块名推断：_is_ascend_module() + _infer_module_name()
+     - 轮转清理：RotatingAscendFileHandler（20MB 自动轮转 + 旧日志清理）
+     - FileHandler 双挂载：同时挂 vllm 和 vllm_ascend，一次配置全覆盖
+     - PR：https://github.com/vllm-project/vllm-ascend/pull/10262
+          https://github.com/vllm-project/vllm-ascend/pull/10306
+
+二、5.2 性能倍增 —— 举证材料对照
+
+KV Cache 池化异步写
+
+   来源项目：async_pool（KV Cache 池化异步写）
+   举证材料：
+     - 设计文档：软件设计/async_pool/design_doc.md
+     - 时序图：软件设计/async_pool/02_异步写完整流程.png
+     - 核心方案：Event 循环队列实现 Prefill/Decode 跨流异步同步
+     - 性能收益：Prefill 阶段不阻塞，长序列场景吞吐量提升
+     - 支持模型：Qwen 稠密、DeepSeek 系列
+     - 特性叠加：Prefix Cache、Context Parallel、Sequence Parallel
+     - PR：https://gitcode.com/Ascend/MindIE-LLM/pull/705

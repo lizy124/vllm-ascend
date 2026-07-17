@@ -1,0 +1,26 @@
+开发者测试工作总结
+
+新增 6000+ 行，覆盖 88 个文件，其中开发代码约 2400 行，测试代码约 3600 行。均不同程度覆盖了开发者测试，以下按维度梳理。
+
+一、3.1 开发者测试效果（转测后缺陷率低）
+
+各项目在开发阶段通过单元测试和集成测试提前发现并修复了大量问题：
+
+- 环境变量配置迁移：编写了 test_ascend_config.py 专项测试，覆盖配置优先级、环境变量回退、弃用警告输出、默认值等场景，确保 10 个环境变量的迁移逻辑正确无误。特别针对 enable_flashcomm1 的三级 fallback 场景编写了 test_enable_sp_falls_back_to_env_without_current_config 用例，验证 AscendConfig 未初始化时的兜底行为。
+- 日志质量改进：修改了 4 个已有测试用例（test_kv_transfer_failures.py、test_platform.py），适配新的日志格式和级别变更。CI 全量回归结果：1202 passed，18 skipped，0 failed。
+- KV Cache 池化异步写：设计了特性叠加测试矩阵，验证异步写与异步调度、Prefix Cache、Context Parallel 等特性的组合正确性，同时明确了不支持的组合（SplitFuse、Micro Batch、Multi-Lora），避免不可预期的报错。
+- Pooling 功能测试补充：以共同作者身份参与，新增 9 个测试文件（+2975 行），将 Pooling 函数覆盖率提升至 80%。通过 _mock_deps.py 统一封装 torch、vllm 等重依赖的 Mock，避免各测试文件重复模拟，为后续 ascend_store 其他模块的测试提供了可复用的基础设施。
+
+二、3.2 DT 用例实现（CleanCode 要求）
+
+测试代码遵循项目既定规范，结构清晰：
+
+- 独立日志系统：测试用例覆盖全面，包括 _is_ascend_module 判断逻辑、_infer_module_name 推断逻辑、AscendFormatter 前缀添加、文件轮转机制、旧日志清理等，每个功能点独立验证，便于扩展和维护。
+- Layerwise KV Events：新增 69 行测试代码（test_kv_transfer.py），覆盖按层存储、累积 Event 生成、线程安全、内存清理四个核心场景，测试用例与设计文档一一对应。
+- Pooling 测试：_mock_deps.py 将重依赖 Mock 逻辑集中管理，各测试文件只需一行 import 即可复用，体现了 DRY 原则和良好的可维护性。
+
+三、3.3 开发者测试持续改进
+
+- 日志质量改进：根据日志格式变化同步更新了 4 个已有测试用例，确保测试与代码保持同步，体现了测试的持续维护。
+- 环境变量配置迁移：在设计文档中明确指出了 MSMonitor_USE_DAEMON 的 fallback 场景缺少专门测试，并给出了补充建议，展现了测试覆盖率的持续改进意识。
+- 代码风格：所有 Python 项目均通过 ruff check 和 ruff format 检查，测试代码与业务代码遵循相同的 CleanCode 标准。

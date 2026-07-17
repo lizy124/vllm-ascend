@@ -1,0 +1,148 @@
+﻿层级,类型,目录/文档,相对路径,Owner,备注,原因
+0,目录,vllm-ascend,vllm-ascend,,,根目录，无法对应单一特性条目
+1,目录,.github/,vllm-ascend/.github,,,公共基础设施
+2,文档,PULL_REQUEST_TEMPLATE.md,vllm-ascend/.github/PULL_REQUEST_TEMPLATE.md,,,公共基础设施
+2,目录,workflows/,vllm-ascend/.github/workflows,,,公共基础设施
+3,文档,READMD.md,vllm-ascend/.github/workflows/READMD.md,,,公共基础设施
+1,文档,AGENTS.md,vllm-ascend/AGENTS.md,,,公共基础设施
+1,目录,benchmarks/,vllm-ascend/benchmarks,,,公共基础设施
+2,文档,README.md,vllm-ascend/benchmarks/README.md,,,公共基础设施
+2,目录,scripts/,vllm-ascend/benchmarks/scripts,,,公共基础设施
+3,文档,perf_result_template.md,vllm-ascend/benchmarks/scripts/perf_result_template.md,,,公共基础设施
+1,文档,CLAUDE.md,vllm-ascend/CLAUDE.md,,,公共基础设施
+1,文档,CODE_OF_CONDUCT.md,vllm-ascend/CODE_OF_CONDUCT.md,,,公共基础设施
+1,文档,CONTRIBUTING.md,vllm-ascend/CONTRIBUTING.md,,,公共基础设施
+1,目录,docs/,vllm-ascend/docs,,,公共基础设施
+2,文档,README.md,vllm-ascend/docs/README.md,,,公共基础设施
+2,目录,source/,vllm-ascend/docs/source,,,公共文档，无对应特性条目
+3,目录,_templates/,vllm-ascend/docs/source/_templates,,,公共文档，无对应特性条目
+4,文档,Model-Deployment-Tutorial-Template.md,vllm-ascend/docs/source/_templates/Model-Deployment-Tutorial-Template.md,,,公共文档模板，无对应特性条目
+3,目录,community/,vllm-ascend/docs/source/community,,,社区公共文档，无对应特性条目
+4,文档,contributors.md,vllm-ascend/docs/source/community/contributors.md,,,社区贡献者公共文档，无对应特性条目
+4,文档,governance.md,vllm-ascend/docs/source/community/governance.md,,,社区治理公共文档，无对应特性条目
+4,目录,user_stories/,vllm-ascend/docs/source/community/user_stories,,,用户案例公共文档，无对应特性条目
+5,文档,index.md,vllm-ascend/docs/source/community/user_stories/index.md,,,用户案例索引公共文档，无对应特性条目
+5,文档,llamafactory.md,vllm-ascend/docs/source/community/user_stories/llamafactory.md,,,用户案例公共文档，无对应特性条目
+4,文档,versioning_policy.md,vllm-ascend/docs/source/community/versioning_policy.md,,,版本策略公共文档，无对应特性条目
+3,目录,developer_guide/,vllm-ascend/docs/source/developer_guide,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+4,目录,contribution/,vllm-ascend/docs/source/developer_guide/contribution,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,index.md,vllm-ascend/docs/source/developer_guide/contribution/index.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,multi_node_test.md,vllm-ascend/docs/source/developer_guide/contribution/multi_node_test.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,testing.md,vllm-ascend/docs/source/developer_guide/contribution/testing.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+4,目录,Design_Documents/,vllm-ascend/docs/source/developer_guide/Design_Documents,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,ACL_Graph.md,vllm-ascend/docs/source/developer_guide/Design_Documents/ACL_Graph.md,"刘逸舟,柯展,付豪",,graph/aclgraph
+5,文档,add_custom_aclnn_op.md,vllm-ascend/docs/source/developer_guide/Design_Documents/add_custom_aclnn_op.md,"陈龙,毛琦,韩俊",,算子/ascendC算子
+5,文档,context_parallel.md,vllm-ascend/docs/source/developer_guide/Design_Documents/context_parallel.md,"魏桂华,邱纯硕,田馥玮",,attn feature/长序列(CPP)
+5,文档,cpu_binding.md,vllm-ascend/docs/source/developer_guide/Design_Documents/cpu_binding.md,"邹易达,陈楚未",,features/绑核
+5,文档,disaggregated_prefill.md,vllm-ascend/docs/source/developer_guide/Design_Documents/disaggregated_prefill.md,"周学荣,王啸腾",,KVConnector/PD分离
+5,文档,eplb_swift_balancer.md,vllm-ascend/docs/source/developer_guide/Design_Documents/eplb_swift_balancer.md,"曾彦嘉,田馥玮",,features/EPLB
+5,文档,index.md,vllm-ascend/docs/source/developer_guide/Design_Documents/index.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,KV_Cache_Pool_Guide.md,vllm-ascend/docs/source/developer_guide/Design_Documents/KV_Cache_Pool_Guide.md,"赵鹏博,房建伟",,KVConnector/池化
+5,文档,ModelRunner_prepare_inputs.md,vllm-ascend/docs/source/developer_guide/Design_Documents/ModelRunner_prepare_inputs.md,"刘逸舟,柯展",,公共/prepare inputs
+5,文档,npugraph_ex.md,vllm-ascend/docs/source/developer_guide/Design_Documents/npugraph_ex.md,"刘逸舟,柯展,付豪",,graph/npugraph_ex
+5,文档,patch.md,vllm-ascend/docs/source/developer_guide/Design_Documents/patch.md,"王玺源,韩俊,温捷",,公共/patch
+5,文档,quantization.md,vllm-ascend/docs/source/developer_guide/Design_Documents/quantization.md,"王锟鹏,余林峰,温捷,赵fenglin",,quantization/量化框架
+4,目录,evaluation/,vllm-ascend/docs/source/developer_guide/evaluation,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,index.md,vllm-ascend/docs/source/developer_guide/evaluation/index.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,using_ais_bench.md,vllm-ascend/docs/source/developer_guide/evaluation/using_ais_bench.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,using_evalscope.md,vllm-ascend/docs/source/developer_guide/evaluation/using_evalscope.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,using_lm_eval.md,vllm-ascend/docs/source/developer_guide/evaluation/using_lm_eval.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,using_opencompass.md,vllm-ascend/docs/source/developer_guide/evaluation/using_opencompass.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+4,目录,performance_and_debug/,vllm-ascend/docs/source/developer_guide/performance_and_debug,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,index.md,vllm-ascend/docs/source/developer_guide/performance_and_debug/index.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,msprobe_guide.md,vllm-ascend/docs/source/developer_guide/performance_and_debug/msprobe_guide.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,optimization_and_tuning.md,vllm-ascend/docs/source/developer_guide/performance_and_debug/optimization_and_tuning.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,performance_benchmark.md,vllm-ascend/docs/source/developer_guide/performance_and_debug/performance_benchmark.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+5,文档,service_profiling_guide.md,vllm-ascend/docs/source/developer_guide/performance_and_debug/service_profiling_guide.md,"甄文奇,康宇昕,刘国琴",,文档/developer guide
+3,文档,faqs.md,vllm-ascend/docs/source/faqs.md,,,FAQ 公共文档，覆盖多类问题，无法对应单一特性条目
+3,文档,index.md,vllm-ascend/docs/source/index.md,,,文档首页/索引，无法对应单一特性条目
+3,文档,installation.md,vllm-ascend/docs/source/installation.md,"张新悦,康宇昕,刘国琴",,文档/quick start/installation
+3,文档,llms.txt,vllm-ascend/docs/source/llms.txt,,,面向 LLM 的文档导航清单，无法对应单一特性条目
+3,文档,quick_start.md,vllm-ascend/docs/source/quick_start.md,"张新悦,康宇昕,刘国琴",,文档/quick start/installation
+3,目录,tutorials/,vllm-ascend/docs/source/tutorials,"陈歆怡/蓝王力/游致远,康宇昕,刘国琴",,文档/tutorial
+4,目录,features/,vllm-ascend/docs/source/tutorials/features,"陈歆怡/蓝王力/游致远,康宇昕,刘国琴",,文档/tutorial
+5,文档,index.md,vllm-ascend/docs/source/tutorials/features/index.md,"陈歆怡/蓝王力/游致远,康宇昕,刘国琴",,文档/tutorial
+5,文档,long_sequence_context_parallel_multi_node.md,vllm-ascend/docs/source/tutorials/features/long_sequence_context_parallel_multi_node.md,"魏桂华,邱纯硕,田馥玮",,attn feature/长序列(CPP)
+5,文档,long_sequence_context_parallel_single_node.md,vllm-ascend/docs/source/tutorials/features/long_sequence_context_parallel_single_node.md,"魏桂华,邱纯硕,田馥玮",,attn feature/长序列(CPP)
+5,文档,pd_colocated_mooncake_multi_instance.md,vllm-ascend/docs/source/tutorials/features/pd_colocated_mooncake_multi_instance.md,"周学荣,王啸腾",,KVConnector/PD分离
+5,文档,pd_disaggregation_mooncake_multi_node.md,vllm-ascend/docs/source/tutorials/features/pd_disaggregation_mooncake_multi_node.md,"周学荣,王啸腾",,KVConnector/PD分离
+5,文档,pd_disaggregation_mooncake_single_node.md,vllm-ascend/docs/source/tutorials/features/pd_disaggregation_mooncake_single_node.md,"周学荣,王啸腾",,KVConnector/PD分离
+5,文档,ray.md,vllm-ascend/docs/source/tutorials/features/ray.md,"陈歆怡/蓝王力/游致远,康宇昕,刘国琴",,文档/tutorial；feature_sheet1.csv 无 Ray 对应特性小类
+5,文档,suffix_speculative_decoding.md,vllm-ascend/docs/source/tutorials/features/suffix_speculative_decoding.md,"李泽桐,王盈聪",,spec decode/suffix-decoding
+4,目录,hardwares/,vllm-ascend/docs/source/tutorials/hardwares,"陈歆怡/蓝王力/游致远,康宇昕,刘国琴",,文档/tutorial
+5,文档,310p.md,vllm-ascend/docs/source/tutorials/hardwares/310p.md,"程少旭,王恒康",,边端/310p
+5,文档,index.md,vllm-ascend/docs/source/tutorials/hardwares/index.md,"陈歆怡/蓝王力/游致远,康宇昕,刘国琴",,文档/tutorial
+4,目录,models/,vllm-ascend/docs/source/tutorials/models,"陈歆怡/蓝王力/游致远,康宇昕,刘国琴",,文档/tutorial
+5,文档,DeepSeek-R1.md,vllm-ascend/docs/source/tutorials/models/DeepSeek-R1.md,陈梦龙、王奕璇,,原始数据已填写
+5,文档,DeepSeek-V3.1.md,vllm-ascend/docs/source/tutorials/models/DeepSeek-V3.1.md,陈梦龙、王奕璇,,原始数据已填写
+5,文档,DeepSeek-V3.2.md,vllm-ascend/docs/source/tutorials/models/DeepSeek-V3.2.md,王宇涵,,原始数据已填写
+5,文档,DeepSeek-V4-Flash.md,vllm-ascend/docs/source/tutorials/models/DeepSeek-V4-Flash.md,朱意霖,,原始数据已填写
+5,文档,DeepSeek-V4-Pro.md,vllm-ascend/docs/source/tutorials/models/DeepSeek-V4-Pro.md,朱意霖,,原始数据已填写
+5,文档,DeepSeekOCR2.md,vllm-ascend/docs/source/tutorials/models/DeepSeekOCR2.md,王蓓,,原始数据已填写
+5,文档,GLM4.x.md,vllm-ascend/docs/source/tutorials/models/GLM4.x.md,游致远,,原始数据已填写
+5,文档,GLM5.md,vllm-ascend/docs/source/tutorials/models/GLM5.md,马宁悦（PAE）、张杨,,原始数据已填写
+5,文档,index.md,vllm-ascend/docs/source/tutorials/models/index.md,,,原始数据已填写
+5,文档,Kimi-K2-Thinking.md,vllm-ascend/docs/source/tutorials/models/Kimi-K2-Thinking.md,游致远,,原始数据已填写
+5,文档,Kimi-K2.5.md,vllm-ascend/docs/source/tutorials/models/Kimi-K2.5.md,张甲康/赵俊博,,原始数据已填写
+5,文档,MiniMax-M2.md,vllm-ascend/docs/source/tutorials/models/MiniMax-M2.md,小巧灵待定（A2），赵可瑞（A3），宗浩鑫（A5）,,原始数据已填写
+5,文档,PaddleOCR-VL.md,vllm-ascend/docs/source/tutorials/models/PaddleOCR-VL.md,牛诗雅,,原始数据已填写
+5,文档,Qwen-VL-Dense.md,vllm-ascend/docs/source/tutorials/models/Qwen-VL-Dense.md,王蓓,,原始数据已填写
+5,文档,Qwen2.5-7B.md,vllm-ascend/docs/source/tutorials/models/Qwen2.5-7B.md,,,当前 docs 目录下未找到对应文档，无法结合文档内容确认 owner
+5,文档,Qwen2.5-Omni.md,vllm-ascend/docs/source/tutorials/models/Qwen2.5-Omni.md,,,当前 docs 目录下未找到对应文档，无法结合文档内容确认 owner
+5,文档,Qwen3_embedding.md,vllm-ascend/docs/source/tutorials/models/Qwen3_embedding.md,外部贡献,,原始数据已填写
+5,文档,Qwen3_reranker.md,vllm-ascend/docs/source/tutorials/models/Qwen3_reranker.md,外部贡献,,原始数据已填写
+5,文档,Qwen3-235B-A22B.md,vllm-ascend/docs/source/tutorials/models/Qwen3-235B-A22B.md,小巧灵待定（A2），董钰彬（A3、A5）,,原始数据已填写
+5,文档,Qwen3-30B-A3B.md,vllm-ascend/docs/source/tutorials/models/Qwen3-30B-A3B.md,小巧灵待定（A2），徐驰（A3、A5）,,原始数据已填写
+5,文档,Qwen3-32B-W4A4.md,vllm-ascend/docs/source/tutorials/models/Qwen3-32B-W4A4.md,小巧灵待定（A2），肖士湘/董钰彬（A3、A5）,内容整合到Qwen3-Dense.md中呈现；单独的文档下线,原始数据已填写
+5,文档,Qwen3-8B-W4A8.md,vllm-ascend/docs/source/tutorials/models/Qwen3-8B-W4A8.md,小巧灵待定（A2），肖士湘/董钰彬（A3、A5）,内容整合到Qwen3-Dense.md中呈现；单独的文档下线,原始数据已填写
+5,文档,Qwen3-Coder-30B-A3B.md,vllm-ascend/docs/source/tutorials/models/Qwen3-Coder-30B-A3B.md,小巧灵待定（A2），徐驰（A3、A5）,,原始数据已填写
+5,文档,Qwen3-Dense.md,vllm-ascend/docs/source/tutorials/models/Qwen3-Dense.md,小巧灵待定（A2），董钰彬（A3、A5）,,原始数据已填写
+5,文档,Qwen3-Next.md,vllm-ascend/docs/source/tutorials/models/Qwen3-Next.md,王蓓,,原始数据已填写
+5,文档,Qwen3-Omni-30B-A3B-Thinking.md,vllm-ascend/docs/source/tutorials/models/Qwen3-Omni-30B-A3B-Thinking.md,檀灏安,,原始数据已填写
+5,文档,Qwen3-VL-235B-A22B-Instruct.md,vllm-ascend/docs/source/tutorials/models/Qwen3-VL-235B-A22B-Instruct.md,龙钢,,原始数据已填写
+5,文档,Qwen3-VL-30B-A3B-Instruct.md,vllm-ascend/docs/source/tutorials/models/Qwen3-VL-30B-A3B-Instruct.md,龙钢,,原始数据已填写
+5,文档,Qwen3-VL-Embedding.md,vllm-ascend/docs/source/tutorials/models/Qwen3-VL-Embedding.md,外部贡献,,原始数据已填写
+5,文档,Qwen3-VL-Reranker.md,vllm-ascend/docs/source/tutorials/models/Qwen3-VL-Reranker.md,外部贡献,,原始数据已填写
+5,文档,Qwen3.5-27B-Qwen3.6-27B.md,vllm-ascend/docs/source/tutorials/models/Qwen3.5-27B-Qwen3.6-27B.md,余登高（王瑞庆）,,原始数据已填写
+5,文档,Qwen3.5-397B-A17B.md,vllm-ascend/docs/source/tutorials/models/Qwen3.5-397B-A17B.md,李少鹏,,原始数据已填写
+5,文档,Qwen3.6-35B-A3B.md,vllm-ascend/docs/source/tutorials/models/Qwen3.6-35B-A3B.md,李少鹏,,原始数据已填写
+3,目录,user_guide/,vllm-ascend/docs/source/user_guide,"杨健,康宇昕,刘国琴",,文档/user guide
+4,目录,configuration/,vllm-ascend/docs/source/user_guide/configuration,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,additional_config.md,vllm-ascend/docs/source/user_guide/configuration/additional_config.md,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,env_vars.md,vllm-ascend/docs/source/user_guide/configuration/env_vars.md,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,index.md,vllm-ascend/docs/source/user_guide/configuration/index.md,"杨健,康宇昕,刘国琴",,文档/user guide
+4,目录,deployment_guide/,vllm-ascend/docs/source/user_guide/deployment_guide,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,index.md,vllm-ascend/docs/source/user_guide/deployment_guide/index.md,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,using_volcano_kthena.md,vllm-ascend/docs/source/user_guide/deployment_guide/using_volcano_kthena.md,"杨健,康宇昕,刘国琴",,文档/user guide
+4,目录,feature_guide/,vllm-ascend/docs/source/user_guide/feature_guide,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,batch_invariance.md,vllm-ascend/docs/source/user_guide/feature_guide/batch_invariance.md,"刘荣,魏瑾谦,杨锦阳",,RL/Batch一致性&训推一致
+5,文档,context_parallel.md,vllm-ascend/docs/source/user_guide/feature_guide/context_parallel.md,"魏桂华,邱纯硕,田馥玮",,attn feature/长序列(CPP)
+5,文档,cpu_binding.md,vllm-ascend/docs/source/user_guide/feature_guide/cpu_binding.md,"邹易达,陈楚未",,features/绑核
+5,文档,dynamic_batch.md,vllm-ascend/docs/source/user_guide/feature_guide/dynamic_batch.md,,,文档描述 dynamic batch/SLO 调参能力，但 feature_sheet1.csv 无 dynamic batch 或明确对应小类，无法确认 owner
+5,文档,epd_disaggregation.md,vllm-ascend/docs/source/user_guide/feature_guide/epd_disaggregation.md,"周学荣,王啸腾",,KVConnector/PD分离
+5,文档,eplb_swift_balancer.md,vllm-ascend/docs/source/user_guide/feature_guide/eplb_swift_balancer.md,"曾彦嘉,田馥玮",,features/EPLB
+5,文档,external_dp.md,vllm-ascend/docs/source/user_guide/feature_guide/external_dp.md,"温捷,王子岳",,分布式/TP/EP/DP/PP
+5,文档,Fine_grained_TP.md,vllm-ascend/docs/source/user_guide/feature_guide/Fine_grained_TP.md,"温捷,王子岳",,分布式/TP/EP/DP/PP
+5,文档,graph_mode.md,vllm-ascend/docs/source/user_guide/feature_guide/graph_mode.md,"刘逸舟,柯展,付豪",,graph/aclgraph
+5,文档,index.md,vllm-ascend/docs/source/user_guide/feature_guide/index.md,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,kv_pool.md,vllm-ascend/docs/source/user_guide/feature_guide/kv_pool.md,"赵鹏博,房建伟",,KVConnector/池化
+5,文档,large_scale_ep.md,vllm-ascend/docs/source/user_guide/feature_guide/large_scale_ep.md,"温捷,王子岳",,分布式/TP/EP/DP/PP
+5,文档,layer_sharding.md,vllm-ascend/docs/source/user_guide/feature_guide/layer_sharding.md,蚂蚁cangzhuo,,features/layersharding
+5,文档,lmcache_ascend_deployment.md,vllm-ascend/docs/source/user_guide/feature_guide/lmcache_ascend_deployment.md,"赵鹏博,房建伟",,文档描述 LMCacheAscendConnector 动态 KVConnector，匹配 feature_sheet1.csv 的 KVConnector/multi-connector
+5,文档,lora.md,vllm-ascend/docs/source/user_guide/feature_guide/lora.md,耿力,,features/multilora
+5,文档,Multi_Token_Prediction.md,vllm-ascend/docs/source/user_guide/feature_guide/Multi_Token_Prediction.md,"李泽桐,王盈聪,刘逸舟",,spec decode/mtp/eagle3
+5,文档,netloader.md,vllm-ascend/docs/source/user_guide/feature_guide/netloader.md,,,文档描述 Netloader 权重加载插件，但 feature_sheet1.csv 无 netloader 小类，且无法唯一归入公共/权重加载或权重offload技术
+5,文档,npugraph_ex.md,vllm-ascend/docs/source/user_guide/feature_guide/npugraph_ex.md,"刘逸舟,柯展,付豪",,graph/npugraph_ex
+5,文档,quantization.md,vllm-ascend/docs/source/user_guide/feature_guide/quantization.md,"王锟鹏,余林峰,温捷,赵fenglin",,quantization/量化框架
+5,文档,rfork.md,vllm-ascend/docs/source/user_guide/feature_guide/rfork.md,,,文档描述 RFork warm-start 权重加载/传输插件，但 feature_sheet1.csv 无 RFork 小类，无法唯一确认 owner
+5,文档,sequence_parallelism.md,vllm-ascend/docs/source/user_guide/feature_guide/sequence_parallelism.md,"温捷,王子岳",,分布式/TP/EP/DP/PP
+5,文档,sleep_mode.md,vllm-ascend/docs/source/user_guide/feature_guide/sleep_mode.md,"刘荣,魏瑾谦,杨锦阳",,RL/sleep mode
+5,文档,speculative_decoding.md,vllm-ascend/docs/source/user_guide/feature_guide/speculative_decoding.md,"李泽桐,王盈聪,刘逸舟",,文档覆盖 mtp/eagle3、ngram、suffix-decoding、d-flash 等投机解码方法，按 feature_sheet1.csv 取 spec decode/mtp/eagle3 责任人作为主 owner
+5,文档,structured_output.md,vllm-ascend/docs/source/user_guide/feature_guide/structured_output.md,"温劲,林炜,冀元祎",,公共/reasoning/structured output
+5,文档,ucm_deployment.md,vllm-ascend/docs/source/user_guide/feature_guide/ucm_deployment.md,"赵鹏博,房建伟",,文档描述 UCMConnector、Prefix Cache 与 PD Disaggregation，按 KVConnector/multi-connector 归属确认 owner
+5,文档,weight_prefetch.md,vllm-ascend/docs/source/user_guide/feature_guide/weight_prefetch.md,"王小超,王恒康",,文档为权重预取/权重内存优化能力，匹配 feature_sheet1.csv 的 features/权重offload技术
+4,文档,release_notes.md,vllm-ascend/docs/source/user_guide/release_notes.md,"杨健,康宇昕,刘国琴",,文档/user guide
+4,目录,support_matrix/,vllm-ascend/docs/source/user_guide/support_matrix,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,index.md,vllm-ascend/docs/source/user_guide/support_matrix/index.md,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,supported_features.md,vllm-ascend/docs/source/user_guide/support_matrix/supported_features.md,"杨健,康宇昕,刘国琴",,文档/user guide
+5,文档,supported_models.md,vllm-ascend/docs/source/user_guide/support_matrix/supported_models.md,"杨健,康宇昕,刘国琴",,文档/user guide

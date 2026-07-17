@@ -1,0 +1,1 @@
+https://github.com/vllm-project/vllm-ascend/pull/10086

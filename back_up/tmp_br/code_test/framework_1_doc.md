@@ -1,0 +1,14 @@
+https://docs.vllm.ai/projects/ascend/en/latest/installation.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/additional_config.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/configuration/env_vars.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/cpu_binding.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/graph_mode.html
+https://docs.vllm.ai/projects/ascend/en/latest/developer_guide/Design_Documents/ACL_Graph.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/kv_cache_cpu_offload.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/kv_pool.html
+https://docs.vllm.ai/projects/ascend/en/latest/developer_guide/Design_Documents/KV_Cache_Pool_Guide.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/lmcache_ascend_deployment.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/epd_disaggregation.html
+https://docs.vllm.ai/projects/ascend/en/latest/developer_guide/Design_Documents/disaggregated_prefill.html
+https://docs.vllm.ai/projects/ascend/en/latest/tutorials/features/pd_disaggregation_mooncake_multi_node.html
+https://docs.vllm.ai/projects/ascend/en/latest/user_guide/feature_guide/weight_prefetch.html

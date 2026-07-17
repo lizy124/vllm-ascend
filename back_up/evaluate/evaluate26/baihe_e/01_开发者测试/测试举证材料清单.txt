@@ -1,0 +1,86 @@
+开发者测试举证材料清单
+
+累计总新增 6000+ 行，覆盖 88 个文件，其中开发代码约 2400 行，测试代码约 3600 行。
+
+
+一、KV Cache 池化异步写
+
+PR: https://gitcode.com/Ascend/MindIE-LLM/pull/705
+
+测试场景：
+  - 异步写开启：Prefill 阶段异步写入，Decode 阶段正确等待
+  - 异步写关闭：同步写模式正常工作
+  - Event 循环：多次 Prefill/Decode 循环，Event 正确循环使用
+  - 特性叠加测试矩阵：
+    Qwen + 异步调度 + Prefix Cache → 通过
+    Qwen + Function Call + 异步写 → 通过
+    DeepSeek V3 + Context Parallel + 异步写 → 通过
+    Qwen + SplitFuse + 异步写 → 不支持（已明确约束）
+    Qwen + Multi-Lora + 异步写 → 不支持（已明确约束）
+
+二、环境变量配置迁移
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/9064
+
+测试文件：
+  - tests/ut/test_ascend_config.py（专项测试）
+  - 配置优先级测试：additional_config 优先于环境变量
+  - 环境变量回退测试：无 additional_config 时走环境变量
+  - 弃用警告测试：使用环境变量时输出迁移提示
+  - 默认值测试：均未配置时使用默认值
+  - test_enable_sp_falls_back_to_env_without_current_config：验证 FlashComm1 三级 fallback（AscendConfig 未初始化时的兜底）
+
+三、Layerwise KV Cache Events
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/9468
+
+自测方案：https://github.com/lizy124/vllm-ascend/blob/tmp_br/code_test/kv_events_selftest_plan.md
+自测结果：https://github.com/lizy124/vllm-ascend/tree/tmp_br/code_test/result
+  （含 run_server.sh / curl.py / listen.py / result.txt，覆盖服务启动、请求发送、ZMQ 监听验证、结果记录）
+
+测试文件：
+  - tests/e2e/distributed/ascend_store/test_kv_transfer.py（新增 +69 行）
+  - 按层存储测试：验证 KV cache 按 layer 存储
+  - 累积 Event 生成测试：验证最后一层生成包含所有层信息的 BlockStored
+  - 线程安全测试：验证多线程环境下 layerwise_event_starts 的数据一致性
+  - 内存清理测试：验证 layerwise_event_starts 正确清理，无内存泄漏
+
+四、日志质量改进
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/10086
+
+测试文件：
+  - test_kv_transfer_failures.py：test_logs_failed_blocks（适配新日志格式的多参数）
+  - test_platform.py：
+    test_check_and_update_config_no_model_config_warning（日志级别从 WARNING 改为 INFO）
+    test_check_and_update_config_enforce_eager_mode（修复日志捕获时机）
+    test_check_and_update_config_unsupported_compilation_level（修复日志捕获时机）
+
+CI 回归结果：1202 passed，18 skipped，0 failed
+
+代码风格：ruff check 通过，ruff format 通过
+
+五、独立日志系统
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/10262
+     https://github.com/vllm-project/vllm-ascend/pull/10306
+
+测试文件：
+  - test_is_ascend_module_*：测试 _is_ascend_module() 判断逻辑（Ascend 模块 vs vLLM 核心模块 vs 空路径）
+  - test_infer_module_name_*：测试 _infer_module_name() 推断逻辑（根目录文件、子目录文件、边缘情况）
+  - test_ascend_formatter_*：测试 AscendFormatter 前缀添加逻辑（[vllm-ascend] [module] 前缀）
+  - test_log_dir_constant：测试默认日志路径和保留天数
+  - test_setup_file_logging_*：测试 File logging 配置逻辑
+  - test_rotating_handler_*：测试文件轮转机制（20MB 触发、命名规范）
+  - test_cleanup_old_logs：测试旧日志清理逻辑
+
+六、Pooling 功能测试补充
+
+PR: https://github.com/vllm-project/vllm-ascend/pull/8447
+
+共同作者：lizy124（Co-authored-by）
+
+测试文件（9 个文件，+2975 行）：
+  - tests/ut/distributed/ascend_store/_mock_deps.py（新增 208 行）：Mock 依赖封装，统一管理 torch、vllm 等重依赖的模拟
+  - 8 个 Pooling 单元测试文件，覆盖 Pooling 功能的各类场景
+  - 目标：将 Pooling 函数覆盖率提升至 80%

@@ -1,0 +1,28 @@
+软件编码与重构工作总结
+
+新增 6000+ 行，覆盖 88 个文件，其中开发代码约 2400 行，测试代码约 3600 行。累计改动数十个文件，代码质量与重构意识贯穿始终，以下按评分规则维度梳理。
+
+一、2.1 自己提交代码的质量（CleanCode 要求）
+
+所有项目代码均通过 ruff check 和 ruff format 检查，满足安全、自注释、可读性好、高内聚低耦合的要求。
+
+- 环境变量配置迁移：设计 AscendConfig._get_config_value() 单一入口方法，统一 10 个配置项的处理逻辑，消除重复代码。方法命名清晰（如 enable_flashcomm1、enable_mlapo），配置项与旧环境变量一一对应，可读性好。三级 fallback 和 suppress 兜底机制确保鲁棒性。
+- Layerwise KV Events：新增 KVCacheStoreLayerSendingThread 和 KVCacheStoreLayerRecvingThread 两个线程类，继承自 KVTransferThread，遵循开闭原则（对扩展开放、对修改关闭）。线程安全设计使用独立锁（layerwise_event_lock、done_task_lock），每个锁保护明确的数据结构，职责清晰。
+- 日志质量改进：-- 17 个文件、+429/-186 行，每条日志遵循 parameter=value 格式、包含 type/error 参数快照、附带分析建议，日志即文档。组件标识 [ComponentName] 前缀使日志来源一目了然，降低排查成本。
+- 独立日志系统：AscendFormatter 从文件路径自动推断模块名，避免硬编码。RotatingAscendFileHandler 继承 logging.FileHandler，仅重写 emit 和 _rotate 方法，最小化改动。模块名推断逻辑覆盖根目录、子目录、非 Ascend 模块三类场景，边缘情况处理完备。
+- KV Cache 池化异步写：MemPoolType 枚举取代魔数，Event 循环队列清晰分离 RecordEvent/WaitEvent 职责，代码自注释。Event Adapter 提供 Python/C++ 统一接口，降低调用方耦合。
+
+二、2.2 帮助团队提升代码质量
+
+- 代码检视：积极参与团队代码检视，检视总次数 13 次，有效检视数 8 次，提出高质量检视意见，帮助团队发现问题、提升代码质量。
+- 日志质量改进：引入 log-quality-standard 8 项标准作为团队规范，17 个文件统一整改，为后续日志编写建立了可复用的范式。PR 描述中附带改动前后对比表和模块改动汇总，便于 reviewer 检视。
+- 环境变量配置迁移：在 AscendConfig 中建立 _get_config_value() 静态方法模板，设计文档中提供"添加新配置项"的开发者指南和测试模板，后续开发者可直接复用。
+- 独立日志系统：设计文档详述 Logger 层级结构、Handler 架构、Formatter 设计，为团队理解日志系统提供完整参考。
+
+三、2.3 消除历史债务
+
+- 环境变量配置迁移：消除 10 个散落在代码各处的环境变量，统一收敛到 AscendConfig 类。旧环境变量在过渡期仍可用但输出弃用警告，为后续彻底移除建立清晰的路径和时间表。
+- 日志质量改进：修正日志级别误用（正常流程打 ERROR 改为 INFO，异常情况打 INFO 改为 WARNING/ERROR），统一占位符风格（%s 替代 {variable}），消除格式不一致的历史债务。循环内日志降级为 DEBUG，防止刷屏。
+- 独立日志系统：解决 vLLM-Ascend 日志与 vLLM 核心日志混在一起的长期问题，通过独立 Logger Namespace 和 propagate=False 实现彻底隔离，消除耦合债务。
+
+注：官方统计代码提交总量为 2153 行，受限于统计规则（单文件超 1000 行不纳入统计等），部分代码未计入。实际六个项目累计新增 6000+ 行，详见举证材料清单。

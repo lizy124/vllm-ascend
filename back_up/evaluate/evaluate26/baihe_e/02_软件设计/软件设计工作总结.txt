@@ -1,0 +1,25 @@
+软件设计工作总结
+
+均编写了完整的设计文档并配有类图/时序图/架构图，以下按评分规则维度梳理。
+
+一、1.1 设计质量
+
+各项目从实际痛点出发，设计上注重解耦、可扩展和向后兼容。
+
+- KV Cache 池化异步写：从长序列推理阻塞的客户痛点出发，设计 MemPoolType 枚举（DISABLED/SYNC_WRITE/ASYNC_WRITE）三层模式，通过 Event 循环队列实现 Prefill 与 Decode 的跨流异步同步，不阻塞计算。明确约束了支持的模型与特性组合，可靠性考虑周全。
+- 环境变量配置迁移：以降低用户学习成本为目标，设计两级配置优先级（additional_config > 环境变量），统一配置入口。针对 FlashComm1 和 MSMonitor 两个需早期读取的特殊场景，分别设计三级 fallback 和 suppress 兜底方案，确保在任何初始化阶段配置可读。过渡期输出弃用警告，平滑迁移无 breaking change。
+- Layerwise KV Events：为分布式 PD 分离场景设计按层累积 Event 机制，前 N-1 层只记录、最后一层统一生成，精确同步。使用独立锁保护共享数据，线程安全与内存管理一并考虑，默认关闭不影响现有行为。
+- 独立日志系统：以"不修改 vLLM 全局 state"为安全底线，设计独立 Logger Namespace 和 AscendFormatter，从文件路径自动推断模块名加前缀。RotatingAscendFileHandler 同时挂载到 vllm 和 vllm_ascend 两个 logger，完整捕获所有日志。模块间耦合度低，不影响 upstream tests。
+
+二、1.2 文档质量
+
+每个项目均配有详细设计文档和对应的 Mermaid 图表，关键上下文清晰完整。
+
+| 项目 | 设计文档 | 图表（PNG） |
+| KV Cache 池化异步写 | design_doc.md | 01_类图.png + 02_异步写完整流程.png |
+| 环境变量配置迁移 | design_doc.md | 02_配置迁移完整流程.png |
+| Layerwise KV Events | design_doc.md | 01_类图.png + 02_累积Event时序图.png |
+| 日志质量改进 | design_doc.md | — |
+| 独立日志系统 | design_doc.md | 01_类图.png + 03_日志系统时序图.png |
+
+设计文档覆盖背景动机、数据结构、核心流程、线程模型、错误处理、测试验证等关键章节，类图展示核心类及其关系，时序图清晰还原运行时交互过程，满足评审和交接需求。

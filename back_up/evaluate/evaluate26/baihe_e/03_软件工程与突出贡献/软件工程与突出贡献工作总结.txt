@@ -1,0 +1,23 @@
+软件工程与突出贡献工作总结
+
+一、4.1 开发或引入工具、工程方法提升效率
+
+1. 引入日志质量标准化体系
+
+将 log-quality-standard 规范引入 vLLM-Ascend 项目，包含 8 项核心标准（事件必记、分级清晰、描述充分、组件归属、防刷屏、链路追踪、隐私保护等）和 4 个配套 Skill（scan-code / write / rewrite），将日志整改从"凭经验修改"升级为标准化流程。本次日志质量改进 PR 按此体系对 17 个文件进行统一整改（+429/-186 行），后续团队可直接复用该规范进行日志编写和检视。
+
+2. 建立配置迁移标准化范式
+
+在环境变量配置迁移项目中，设计 AscendConfig._get_config_value() 统一配置获取方法，建立两级优先级（additional_config > 环境变量）和弃用警告机制。设计文档中提供"添加新配置项"的开发者指南——3 步即可完成（定义环境变量、添加配置项、编写测试），后续新增 Ascend 特有配置项有章可循，降低团队协作成本。
+
+3. 建立设计文档标准化交付物
+
+五个项目全部交付 design_doc.md + Mermaid 图表（类图/时序图/架构图/线程模型图），设计文档覆盖背景动机、数据结构、核心流程、线程模型、错误处理、测试验证等关键章节，降低了文档维护成本和评审门槛。
+
+4. 独立日志系统工程化
+
+设计独立 Logger Namespace（vllm_ascend）和 AscendFormatter，从文件路径自动推断模块名并添加 [vllm-ascend] [module] 前缀，无需手动配置。RotatingAscendFileHandler 实现 20MB 自动轮转，旧日志自动清理。FileHandler 同时挂载到 vllm 和 vllm_ascend 两个 logger，一次配置完整捕获所有日志，减少运维配置工作。
+
+二、5.2 性能倍增
+
+KV Cache 池化异步写：通过引入 Event 循环队列实现 Prefill 与 Decode 的跨流异步同步，将 Prefill 阶段的 KV Cache 写入从同步阻塞改为异步执行，推理计算不被写入操作阻塞。在长序列推理场景下，Prefill 吞吐量显著提升，多轮对话场景延迟降低。该优化已支持 Qwen 稠密和 DeepSeek 系列模型，可与 Prefix Cache、Context Parallel、Sequence Parallel 等特性叠加使用，覆盖主流推理场景。
