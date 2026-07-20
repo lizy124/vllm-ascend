@@ -1,9 +1,20 @@
 # 池化与 PD 分离：用例覆盖分析与缺口
 
-> **概念区分参考：** [pd_vs_pool_concept.md](back_up/pd_vs_pool_concept.md)
->
-> - **池化（kv_pool）**：`kv_transfer/kv_pool/` — KV cache 存储/查找/复用，单节点内跨请求共享
-> - **PD 分离（disaggregated prefill）**：`kv_transfer/kv_p2p/` — prefill 节点直传 KV cache 到 decode 节点，跨节点单向传输
+> **概念区分参考：** 官方设计文档 [KV_Cache_Pool_Guide.md](../docs/source/developer_guide/Design_Documents/KV_Cache_Pool_Guide.md) / [disaggregated_prefill.md](../docs/source/developer_guide/Design_Documents/disaggregated_prefill.md)
+
+## 核心区别
+
+| 维度 | 池化（kv_pool） | PD 分离（disaggregated prefill） |
+|---|---|---|
+| **本质** | KV cache **存储**：存到池子 → 按 key 查找 → 加载复用 | KV cache **传输**：prefill 算完直接 P2P 传 decode，用完即丢 |
+| **数据生命周期** | 持久化在池中（DRAM/SSD），跨请求复用 | 一次性传输，不持久化 |
+| **目录** | `kv_transfer/kv_pool/` | `kv_transfer/kv_p2p/` |
+| **核心 Connector** | `AscendStoreConnector`（后端起 Mooncake/Memcache/Yuanrong） | `MooncakeConnectorV1`（pull）/ `MooncakeLayerwiseConnector`（push） |
+| **是否可共存** | 可以！通过 `MultiConnector` 同时启用池化+PD 分离：池化负责 prefix cache 复用，PD 分离负责 P2P 传输 |
+
+> **池化有两种部署模式：**
+> 1. **PD-Mixed**（`kv_both`）：单实例自己存自己取，池子作为共享 prefix cache
+> 2. **PD 分离 + 池化**（`kv_producer`/`kv_consumer`）：prefill 存入池子，decode 从池子加载，通过 `MultiConnector` 组合 `MooncakeConnectorV1` + `AscendStoreConnector`
 
 ---
 
@@ -11,13 +22,15 @@
 
 `vllm_ascend/distributed/kv_transfer/__init__.py` 注册了 5 个池化 connector：
 
-| Connector | 注册名 | 源文件 | 外部依赖 |
-|---|---|---|---|
-| `AscendStoreConnector` | `MooncakeConnectorStoreV1` / `AscendStoreConnector` | `kv_pool/ascend_store/` | Mooncake 服务 |
-| `SimpleCPUOffloadConnector` | `SimpleCPUOffloadConnector` | `kv_pool/simple_cpu_offload/` | 无 |
-| `RecomputeCPUOffloadConnector` | `RecomputeCPUOffloadConnector` | `kv_pool/recompute_cpu_offload/` | 无 |
-| `LMCacheAscendConnector` | `LMCacheAscendConnector` | `kv_pool/lmcache_ascend_connector.py` | `lmcache_ascend` 库 |
-| `UCMConnector` | `UCMConnector` | `kv_pool/ucm_connector.py` | `ucm` 库 + UCM 服务 |
+| Connector | 注册名 | 后端 | 部署模式 | 外部依赖 |
+|---|---|---|---|---|
+| `AscendStoreConnector` | `MooncakeStoreConnectorV1` / `AscendStoreConnector` | Mooncake、Memcache、Yuanrong | `kv_both`、`kv_producer`/`kv_consumer` | Mooncake 服务 / Memcache 服务 |
+| `SimpleCPUOffloadConnector` | `SimpleCPUOffloadConnector` | CPU DRAM | `kv_both` | 无 |
+| `RecomputeCPUOffloadConnector` | `RecomputeCPUOffloadConnector` | CPU DRAM | `kv_both` | 无 |
+| `LMCacheAscendConnector` | `LMCacheAscendConnector` | LMCache 后端 | `kv_both` | `lmcache_ascend` 库 |
+| `UCMConnector` | `UCMConnector` | UCM | `kv_both` | `ucm` 库 + UCM 服务 |
+
+> **`AscendStoreConnector` 还支持 Layerwise 模式**（`use_layerwise: true`），以逐层方式 save/load KV cache，减少首 token 延迟。当前仅支持 Memcache 后端。详见 [layerwise_kv_pool.md](../docs/source/user_guide/feature_guide/layerwise_kv_pool.md)。
 
 ### 1.1 pull_request 测试
 
@@ -77,11 +90,13 @@
 
 `vllm_ascend/distributed/kv_transfer/kv_p2p/` 下共 3 个 connector：
 
-| Connector | 源文件 | 传输粒度 |
+| Connector | 传输模式 | 工作原理 |
 |---|---|---|
-| `MooncakeConnectorV1` | `kv_p2p/mooncake_connector.py` | 按 request 粒度 |
-| `MooncakeLayerwiseConnector` | `kv_p2p/mooncake_layerwise_connector.py` | 按 layer 逐层传输 |
-| `MooncakeHybridConnector` | `kv_p2p/mooncake_hybrid_connector.py` | 继承 V1，处理 MLA/Full Attention 混合 |
+| `MooncakeConnectorV1` | **Pull**（D 节点拉取） | Proxy 路由请求到 P 节点做完 prefill → D 节点主动从 P 节点拉取 KV cache |
+| `MooncakeLayerwiseConnector` | **Push**（P 节点推送） | P 节点逐层算完 KV 后立即推送给 D 节点，D 节点逐层接收后开始 decode |
+| `MooncakeHybridConnector` | Pull + 混合 | 继承 V1，处理 MLA/Full Attention 混合模型（如 DeepSeek-V4） |
+
+> **PD 分离架构：** 全局 Proxy 接收外部请求，将 prefill 转发到 P 节点，decode 转发到 D 节点，KV cache 通过 P2P 在 P/D 节点间交换。详见 [disaggregated_prefill.md](../docs/source/developer_guide/Design_Documents/disaggregated_prefill.md)。
 
 ### 2.1 pull_request 测试
 
