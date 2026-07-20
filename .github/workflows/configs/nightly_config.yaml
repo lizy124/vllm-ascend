@@ -93,6 +93,9 @@ a3:
       - name: multi-node-GLM-5.2-w8a8-A3
         config_file_path: GLM5_2-W8A8-A3-dual-nodes.yaml
         size: 2
+      - name: multi-node-glm-4.7-mooncake-layerwise
+        config_file_path: GLM-4.7-W8A8C8-Mooncake-Layerwise.yaml
+        size: 2
   double_node:
     test_config:
       - name: multi-node-deepseek-r1-w8a8-longseq
