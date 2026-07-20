@@ -1,6 +1,6 @@
 # 池化与 PD 分离：用例覆盖分析与缺口
 
-> **概念区分参考：** 官方设计文档 [KV_Cache_Pool_Guide.md](../docs/source/developer_guide/Design_Documents/KV_Cache_Pool_Guide.md) / [disaggregated_prefill.md](../docs/source/developer_guide/Design_Documents/disaggregated_prefill.md)
+> **概念区分参考：** [pd_vs_pool_concept.md](back_up/pd_vs_pool_concept.md) / 官方设计文档 [KV_Cache_Pool_Guide.md](../docs/source/developer_guide/Design_Documents/KV_Cache_Pool_Guide.md) / [disaggregated_prefill.md](../docs/source/developer_guide/Design_Documents/disaggregated_prefill.md)
 
 ## 核心区别
 
