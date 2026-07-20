@@ -47,14 +47,50 @@ PD 分离的本质是：**prefill 节点算完 KV cache 后，直接 P2P 传给 
 ### 2.2 架构
 
 ```
-外部请求 → 全局 Proxy
+外部请求 → 全局 Proxy (9000)        ← 用户只跟 Proxy 交互
               │
-              ├─→ Prefill 节点 (kv_producer)  ─┐
-              │     计算 KV cache               │ P2P 直传 KV cache
-              │                                 │ (不经过 Proxy)
-              └─→ Decode 节点 (kv_consumer)  ←─┘
+              ├─→ Prefill 节点 (8100)  ─┐
+              │     计算 KV cache       │ P2P 直传 KV cache
+              │                         │ (数据面不经过 Proxy)
+              └─→ Decode 节点 (8200)  ←─┘
                     接收 KV cache 后 decode
 ```
+
+**Proxy 的职责：**
+
+Proxy 是 PD 分离的"调度中心"——没有它，prefiller 和 decoder 之间虽然能 P2P 传 KV cache，但**外部请求不知道发给谁**。
+
+| 职责 | 说明 |
+|---|---|
+| 请求路由 | 接收用户的 OpenAI 兼容请求，把 prefill 阶段转发给 Prefill 节点，decode 阶段转发给 Decoder 节点 |
+| 负载均衡 | 支持多对 Prefill/Decoder 实例（`--prefiller-hosts` / `--decoder-hosts`），自动分发请求 |
+| 流式透传 | 把 Decoder 的流式输出（SSE）透传给客户端 |
+| 健康检查 | 提供 `/healthcheck` 端点，返回连接的 prefiller/decoder 数量 |
+
+**Proxy 的实现：**
+
+E2E 测试框架直接使用仓库中的示例脚本启动 Proxy：
+
+```python
+# tests/e2e/nightly/multi_node/internal_dp/scripts/multi_node_config.py:121-124
+self.proxy_script = envs.get(
+    "DISAGGREGATED_PREFILL_PROXY_SCRIPT",
+    "examples/disaggregated_prefill_v1/load_balance_proxy_server_example.py",
+)
+```
+
+`ProxyLauncher` 在 master 节点上自动拉起这个脚本，把 prefiller 和 decoder 的 IP/端口传进去：
+
+```bash
+python load_balance_proxy_server_example.py \
+    --host <master_ip> --port 9000 \
+    --prefiller-hosts <p_ip1> <p_ip2> \
+    --prefiller-ports 8100 8100 \
+    --decoder-hosts <d_ip1> <d_ip2> \
+    --decoder-ports 8200 8200
+```
+
+**关键：Proxy 只参与控制面，不参与数据面。** KV cache 的 P2P 传输走 Mooncake RDMA，完全不经过 Proxy——否则 Proxy 会成为瓶颈，PD 分离就没意义了。
 
 ### 2.3 两种传输模式
 
@@ -197,6 +233,141 @@ class ExternalCachedBlockPool:
 | 关键方法 | `send_kv` / `recv_kv` | `save_kv_layer` / `start_load_kv` / `lookup` |
 | Mooncake 作用 | P2P Transfer Engine（RDMA 直传） | Mooncake Store（持久化存储 + master 服务） |
 | 可共存 | 可以！通过 `MultiConnector` 同时启用 |
+
+### 4.1 为什么 PD 分离不需要存储，而池化需要？
+
+本质区别在于**消费者是否"在线等着"**。
+
+**PD 分离：消费者在等着**
+
+```
+时间轴 ──────────────────────────────────────────→
+
+Prefill 节点:  [算 KV cache] ──RDMA直传──→ 释放
+Decode 节点:   [  空转等待  ] ←─收到──→ [decode decode decode...]
+
+P 和 D 是同时存在的，D 等着 P 算完，P 算完立刻传，D 立刻用。
+```
+
+- P 和 D **同时在线**，D 正空转等着 P 的 KV cache 来干活
+- P 算完直接 RDMA 塞给 D，不需要存——传完就丢，因为 D 已经接住了
+- 就像两个人面对面递东西：A 递出来，B 立刻接住，不需要放地上
+
+**池化：没人等着**
+
+```
+时间轴 ──────────────────────────────────────────→
+
+请求 A:  [算 KV cache] → 存入池子 → 结束
+                                        ...（可能几秒、几分钟后）
+请求 B:                              [查找池子] → 命中！→ 加载复用 → 开始 decode
+
+A 和 B 是不同时间的请求，B 来的时候 A 早就结束了。
+```
+
+- 当前请求算完 KV cache 时，**没有人在等它**
+- 未来请求可能几秒、几分钟后才来，甚至不来
+- 所以必须**持久化到池子里**，等未来请求来了再查、再加载
+- 就像把东西存到仓库：现在用不上，但以后可能有人来取
+
+**用代码对照：**
+
+| | PD 分离 | 池化 |
+|---|---|---|
+| 数据流向 | P → D（同时在线，传完即丢） | 存入池子 → ... → 从池子加载（不同时间） |
+| 关键操作 | `batch_transfer_sync_read`（RDMA 读远端 NPU 显存） | `save_kv_layer` → `lookup` → `start_load_kv`（put/get 到后端存储） |
+| 为什么需要存储 | **不需要**，因为 D 立刻接住就用 | **需要**，因为消费者可能很久以后才来 |
+
+> **一句话：PD 分离是"我在等你"，所以直接递给你就行；池化是"我不在，先放仓库，以后来取"。**
+
+### 4.2 代码印证：PD 分离确实不落盘
+
+从代码可以清晰证明 PD 分离不持久化，四层证据链互相印证：
+
+**证据一：传输引擎初始化 —— 明确声明 P2P 模式，不是存储模式**
+
+```python
+# kv_p2p/utils/mooncake_transfer_engine.py:28
+self.transfer_engine.initialize(hostname, "P2PHANDSHAKE", "ascend", device_name)
+```
+
+`"P2PHANDSHAKE"` 是 Mooncake 的 P2P 直传模式，和存储模式（Mooncake Store）是两套完全不同的 API。如果是存储模式，初始化参数会是 `"apollo"` 或 `"memcache"` 这类后端地址。
+
+**证据二：传输 API —— 只有 RDMA 读，没有任何存储 API**
+
+```python
+# kv_p2p/mooncake_connector.py:905
+ret = self.engine.batch_transfer_sync_read(session_id, src_list, dst_list, length_list)
+```
+
+PD 分离的整个收发流程中，**只有 `batch_transfer_sync_read` 这一个数据传输 API**。代码里没有任何 `put`、`get`、`save`、`load`、`store` 等存储操作。
+
+对比池化，池化的代码里全是存储 API：
+
+```python
+# kv_pool/ascend_store/ascend_store_connector.py:224-233
+def save_kv_layer(self, layer_name, kv_layer, attn_metadata, **kwargs):
+    self.connector_worker.save_kv_layer(...)  # 存入池子
+
+# kv_pool/ascend_store/ascend_store_connector.py:200-217
+def start_load_kv(self, forward_context, **kwargs):
+    self.connector_worker.start_load_kv(...)   # 从池子加载
+```
+
+**证据三：传输完成后立即释放，不持久化**
+
+```python
+# kv_p2p/mooncake_connector.py:361-362
+elif msg[0] == DONE_RECVING_MSG:
+    logger.debug("Got DONE_RECVING_MSG for request %s", msg[1])
+```
+
+D 节点收到 KV cache 后，通过 ZMQ 发 `DONE_RECVING_MSG` 给 P 节点。P 节点收到后，把 KV block 放入 free 队列——**释放**，不是**存储**：
+
+```python
+# kv_p2p/mooncake_connector.py:168-175
+class KVCacheTaskTracker:
+    # Only used in prefill node. Tracks requests whose kv blocks freeing is
+    # intentionally delayed. Each entry is a tuple of (request_id, timestamp).
+    # If a request remains in this queue for too long, it will be force-freed.
+    self.delayed_free_requests: OrderedDict[str, float] = OrderedDict()
+```
+
+```python
+# kv_p2p/mooncake_connector.py:191
+self.delayed_free_requests.pop(request_id, None)  # 正常释放
+
+# kv_p2p/mooncake_connector.py:233
+"Force freed expired request: %s. "  # 超时强释放
+```
+
+如果 KV cache 是落盘持久化的，就不会有"force free"这种逻辑——持久化意味着想留多久留多久，不会过期强释放。
+
+**证据四：PD 分离代码里完全没有池化组件**
+
+搜遍整个 `kv_p2p/` 目录：
+
+| 池化核心组件 | `kv_p2p/` 搜索结果 |
+|---|---|
+| `KVPoolScheduler` | 0 个结果 |
+| `KVPoolWorker` | 0 个结果 |
+| `ExternalCachedBlockPool` | 0 个结果 |
+| `save_kv_layer` | 0 个结果 |
+| `start_load_kv` | 0 个结果 |
+| `lookup` | 0 个结果 |
+
+这些是池化的核心组件，PD 分离一个都没有。如果 PD 分离需要落盘，至少要有类似 `save_kv_layer` 的调用。
+
+**四层证据总结：**
+
+| 证据层 | 结论 |
+|---|---|
+| 初始化参数 | `"P2PHANDSHAKE"` — 明确 P2P 模式，不是存储模式 |
+| 传输 API | 只有 `batch_transfer_sync_read`（RDMA），没有 `put`/`get`/`save`/`load` |
+| 传输后行为 | `DONE_RECVING` → `delayed_free_requests` → 释放 block，不是存储 |
+| 组件缺失 | `kv_p2p/` 中没有任何池化组件 |
+
+> **代码里没有一行把 KV cache 写到磁盘或任何后端存储，全在 NPU 显存之间 RDMA 直传，传完就释放。**
 
 ---
 
