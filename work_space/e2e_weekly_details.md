@@ -7,10 +7,7 @@
 | **频率** | 每天（cron `0 2 * * *`） | 每周日（cron `0 2 * * 0`） |
 | **平台** | A2、A3 | A2、A3、**310P** |
 | **A2 测试内容** | 单节点模型服务 | **仅精度测试**（accuracy-group），无模型服务 |
-| **A3 测试内容** | 单节点 + 多节点模型服务 | 单节点 + 多节点 + **引擎功能测试** + **Mooncake 池化** |
-| **PD 分离深度** | 6 个 YAML，主要 internal_dp | **17 个 YAML**，主要 external_dp，含 MTP/layerwise 变体 |
-| **引擎功能测试** | 无 | 有 `engine_func_test_robot/`（18 个参数级测试） |
-| **模型精度测试** | 无独立精度测试 | 有 `test_qwen3_30b_acc.py`（含 Mooncake + kv_transfer） |
+| **A3 测试内容** | 单节点 + 多节点模型服务 | 单节点 + 多节点 + 引擎功能测试 |
 | **测试脚本复用** | 自有 test_single_node.py / test_multi_node.py | 复用 nightly 的测试脚本，仅指向不同 config 目录 |
 | **并发限制** | A3 最多 5 个并行 | A3 multi_node 最多 2 个，double_node 最多 3 个，single_node 最多 7 个 |
 
@@ -65,9 +62,9 @@ tests/e2e/weekly/
 │   │       ├── completion_request.py       # 请求构造
 │   │       └── assertion.py                # 断言工具
 │   └── models/
-│       └── test_qwen3_30b_acc.py           # 模型精度测试（含 Mooncake + kv_transfer）
+│       └── test_qwen3_30b_acc.py           # 模型精度测试
 ├── multi_node/
-│   ├── external_dp/                        # 外部 DP（PD 分离主流模式）
+│   ├── external_dp/                        # 多节点测试（外部 routing 协调）
 │   │   └── config/                         # 17 个 YAML（全部被调度）
 │   │       ├── DeepSeek-V4-flash-w8a8-PD.yaml
 │   │       ├── DeepSeek_V3.1T_MTP1_PD.yaml
@@ -86,11 +83,11 @@ tests/e2e/weekly/
 │   │       ├── QWEN3_235B_PD.yaml
 │   │       ├── QWEN3_235B_PD_3_5K_1_5k.yaml
 │   │       └── Qwen-3.5-397B-A17B-W8A8-PD.yaml
-│   └── internal_dp/                        # 内部 DP（含 Mooncake 池化）
+│   └── internal_dp/                        # 多节点测试
 │       └── config/                         # 3 个 YAML（全部被调度）
 │           ├── DeepSeek-V3.yaml
 │           ├── DeepSeek-V3_2-W8A8-EP_weekly.yaml
-│           └── GLM-4.7-W8A8C8-Mooncake-Layerwise.yaml  # ★ Mooncake 池化
+│           └── GLM-4.7-W8A8C8-Mooncake-Layerwise.yaml
 ```
 
 ---
@@ -151,7 +148,7 @@ weekly 没有自己的测试入口脚本，**完全复用 nightly 的测试脚�
 
 **被调度的 11 个 YAML（A3）：**
 
-| YAML | 模型 | TP | 图模式 | 基准测试 |
+| YAML | 模型 | TP | 编译模式 | 基准测试 |
 |---|---|---|---|---|
 | DeepSeek-V3.2-W8A8_A3_weekly | DeepSeek-V3.2 | 8 | FULL_DECODE_ONLY | perf (4 个场景) |
 | GLM-5.yaml | GLM-5-W4A8 | - | - | - |
@@ -231,17 +228,16 @@ def api_client(request):
 
 引擎功能测试在 A3 和 310P 平台上都会执行，共用同一套代码但使用不同的 runner。
 
-### 4.3 模型精度测试（独立 pytest，含 Mooncake 池化）
+### 4.3 模型精度测试（独立 pytest）
 
 `test_qwen3_30b_acc.py` 是 weekly 独有的精度测试，与 nightly 的 YAML 驱动模式完全不同。
 
 **特点：**
 
 - 直接在测试代码中拉起 vllm 服务（不依赖 YAML）
-- 同时启动 **MooncakeLauncher**（Mooncake 分布式 KV 缓存服务）
-- 配置 **kv_transfer**（AscendStoreConnector, kv_both 角色）
-- 配置 **speculative decoding**（Eagle3 推测解码）
-- 测试完成后自动运行 **aisbench 精度基准测试**
+- 同时启动 MooncakeLauncher
+- 配置 speculative decoding（Eagle3 推测解码）
+- 测试完成后自动运行 aisbench 精度基准测试
 
 ```python
 # test_qwen3_30b_acc.py 关键配置
@@ -265,12 +261,12 @@ kv_transfer_config = {
 server_args = [
     "--compilation-config", '{"cudagraph_mode": "FULL_DECODE_ONLY"}',
     "--speculative-config", json.dumps(speculative_config),  # Eagle3
-    "--kv-transfer-config", json.dumps(kv_transfer_config),   # ★ 池化
+    "--kv-transfer-config", json.dumps(kv_transfer_config),
     ...
 ]
 
 with (
-    MooncakeLauncher(mooncake_port, mooncake_metrics_port),  # ★ Mooncake 服务
+    MooncakeLauncher(mooncake_port, mooncake_metrics_port),
     RemoteOpenAIServer(model, server_args, ...) as server,
 ):
     # 先跑 2 轮功能验证
@@ -295,9 +291,9 @@ a2:
           - Llama-3.2-3B-Instruct
 ```
 
-### 4.5 多节点 PD 分离测试
+### 4.5 多节点测试
 
-weekly 的多节点测试全部是 PD 分离，且以 **external_dp** 为主（17 个），比 nightly 的 PD 分离覆盖深得多。
+weekly 的多节点测试全部以 external_dp 为主（17 个）。
 
 **external_dp（17 个，全部被调度）：**
 
@@ -318,11 +314,11 @@ weekly 的多节点测试全部是 PD 分离，且以 **external_dp** 为主（1
 |---|---|---|
 | DeepSeek-V3.yaml | 2 | 标准 DeepSeek V3 |
 | DeepSeek-V3_2-W8A8-EP_weekly.yaml | 2 | DeepSeek V3.2 W8A8 EP |
-| GLM-4.7-W8A8C8-Mooncake-Layerwise.yaml | 2 | **Mooncake 池化 + layerwise KV 传输** |
+| GLM-4.7-W8A8C8-Mooncake-Layerwise.yaml | 2 | MooncakeLayerwise KV 传输 |
 
 ---
 
-## 五、多节点 PD 分离的 YAML 格式差异
+## 五、多节点 YAML 格式差异
 
 weekly 的多节点 YAML 同时存在两种格式：
 
@@ -364,53 +360,7 @@ config:
 
 ---
 
-## 六、三个关键特性在 weekly 中的覆盖情况
-
-### 6.1 PD 分离 — 深度覆盖，全部在 A3
-
-| 指标 | 数值 |
-|---|---|
-| external_dp YAML 总数 | 17（全部被调度） |
-| internal_dp YAML 总数 | 3（全部被调度） |
-| 合计 | **20 个 PD 分离 YAML** |
-| 平台 | 全部在 A3 |
-| 覆盖模型 | DeepSeek V3.1T/V3.2T/V4、GLM 5.1、Kimi K2.5、MiniMax、Qwen3/VL/Qwen3.5 |
-| 变体维度 | MTP1/2/3、layerwise、128K/64K/32K 长序列、不同 batch size |
-
-**与 nightly 对比：** weekly 的 PD 分离覆盖是 nightly 的 3 倍以上，且几乎全部使用 external_dp 模式，场景更丰富。
-
-### 6.2 图模式 — 全覆盖
-
-20 个多节点 PD 分离 YAML 全部包含 `compilation-config`（`torchair_graph`/`cudagraph_mode`/`aclgraph`）。
-
-单节点被调度的 11 个 A3 YAML 也全部包含图编译配置。
-
-| 平台 | 覆盖情况 |
-|---|---|
-| **A3 多节点** | 20/20（全部） |
-| **A3 单节点** | 11/11（全部被调度） |
-| **310P 单节点** | 3/3（全部） |
-
-### 6.3 池化 — 有覆盖，但有限
-
-| 测试 | 池化方式 | 详情 |
-|---|---|---|
-| `test_qwen3_30b_acc.py` | **Mooncake + AscendStoreConnector** | MooncakeLauncher 启动 Mooncake 服务，vllm 以 `kv_both` 角色连接，同时生产/消费 KV cache |
-| `GLM-4.7-W8A8C8-Mooncake-Layerwise.yaml` | **MooncakeLayerwiseConnector** | PD 分离场景下，prefill 节点作为 `kv_producer`，decode 节点作为 `kv_consumer`，通过 Mooncake 传输 KV cache |
-
-**与 nightly 对比：** nightly 完全没有池化覆盖，weekly 有 2 个测试点，但整体仍偏少。
-
-### 6.4 汇总
-
-| 特性 | Weekly A2 | Weekly A3 | Weekly 310P |
-|---|---|---|---|
-| **PD 分离** | 无 | 20 个 YAML（external_dp + internal_dp） | 无 |
-| **图模式** | 无（仅精度测试） | 31 个 YAML（全部） | 3 个 YAML（全部） |
-| **池化** | 无 | 2 个（test_qwen3_30b_acc + Mooncake-Layerwise） | 无 |
-
----
-
-## 七、总结
+## 六、总结
 
 | 维度 | 详情 |
 |---|---|
@@ -420,10 +370,7 @@ config:
 | **测试脚本** | 复用 nightly 的 `test_single_node.py` / `run.sh`，仅指向不同 config 目录 |
 | **单节点** | 11 个 YAML（A3）+ 3 个 YAML（310P），复用 nightly 机制 |
 | **引擎功能测试** | 18 个参数级测试，独立 conftest 拉起 Qwen3-VL-30B，A3 + 310P 均跑 |
-| **模型精度** | `test_qwen3_30b_acc.py`，含 Mooncake + kv_transfer + Eagle3 推测解码 |
-| **多节点 PD 分离** | 20 个 YAML（17 external_dp + 3 internal_dp），全部在 A3 |
+| **模型精度** | `test_qwen3_30b_acc.py`，含 Eagle3 推测解码 |
+| **多节点** | 20 个 YAML（17 external_dp + 3 internal_dp），全部在 A3 |
 | **A2 测试** | 仅精度测试（3 个模型），无模型服务 |
 | **310P 测试** | 引擎功能测试 + 3 个 Qwen3 W8A8SC 单节点模型 |
-| **PD 分离** | 20 个 YAML，覆盖 7 类模型，含 MTP/layerwise/长序列变体 |
-| **图模式** | 几乎所有被调度的 YAML 都包含 |
-| **池化** | 2 个测试点（Mooncake + AscendStoreConnector / MooncakeLayerwiseConnector） |

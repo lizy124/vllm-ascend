@@ -61,12 +61,12 @@ nightly/
 │       ├── multicard_ops_a2/       #   多卡算子（A2 平台）
 │       └── multicard_ops_a3/       #   多卡算子（A3 平台）
 ├── multi_node/
-│   ├── internal_dp/                # ★ PD 分离：disaggregated_prefill 字段
+│   ├── internal_dp/                # 多节点测试（含 PD 分离和纯分布式部署）
 │   │   ├── config/                 #   17 个 YAML 配置
 │   │   └── scripts/
 │   │       ├── test_multi_node.py
 │   │       └── multi_node_config.py
-│   ├── external_dp/                # ★ PD 分离：routing.type 字段
+│   ├── external_dp/                # 多节点测试（外部 routing 协调）
 │   │   ├── config/                 #   1 个 YAML + 模板
 │   │   └── scripts/
 │   │       ├── test_external_dp.py
@@ -392,35 +392,35 @@ output = {
 
 ## 五、多节点测试（multi_node）
 
-### 5.1 internal_dp：PD 分离（disaggregated_prefill 字段）
+### 5.1 internal_dp
 
-| YAML | 模型 | PD 分离 | 平台 |
-|---|---|---|---|
-| `DeepSeek-V3_2-W8A8-EP.yaml` | DeepSeek-V3.2-W8A8 | `disaggregated_prefill: enabled: true` | A3 (env) |
-| `GLM5_1-W8A8-EP.yaml` | GLM-5.1-W8A8 | `disaggregated_prefill: enabled: true` | A3 (env) |
-| `Qwen3-235B-disagg-pd.yaml` | Qwen3-235B | `disaggregated_prefill` + `kv_producer/kv_consumer` | 无标记 |
-| `Qwen3-VL-235B-disagg-pd.yaml` | Qwen3-VL-235B | `disaggregated_prefill` | 无标记 |
-| `Qwen3-235B-W8A8.yaml` | Qwen3-235B-W8A8 | `disaggregated_prefill` | 无标记 |
-| `Qwen3-235B-W8A8-EPLB.yaml` | Qwen3-235B-W8A8 | `disaggregated_prefill` + `kv_producer` | 无标记 |
-| `Qwen3-235B-W8A8-longseq.yaml` | Qwen3-235B-W8A8 | `disaggregated_prefill` | 无标记 |
-| `DeepSeek-R1-W8A8-EPLB.yaml` | DeepSeek-R1-W8A8 | `disaggregated_prefill` + `kv_producer` | 无标记 |
-| `DeepSeek-R1-W8A8-longseq.yaml` | DeepSeek-R1-W8A8 | `disaggregated_prefill` | 无标记 |
-| `DeepSeek-V3.1-BF16.yaml` | DeepSeek-V3.1 | `disaggregated_prefill` | 无标记 |
-| `Qwen3-235B-A22B.yaml` | Qwen3-235B-A22B | 无 PD 分离 | 无标记 |
-| `DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml` | DeepSeek-V3.2 | **无 PD 分离**（仅普通多节点） | A3 (env) |
-| `GLM5_1-W8A8-A2-dual-nodes.yaml` | GLM-5.1 | 无 PD 分离 | A2 (文件名) |
-| `GLM5_1-W8A8-A3-dual-nodes.yaml` | GLM-5.1 | 无 PD 分离 | A3 (文件名) |
-| `GLM5_2-W8A8-A3-dual-nodes.yaml` | GLM-5.2 | 无 PD 分离 | A3 (文件名) |
-| `Kimi-K2_5-W4A8-A2-dual-nodes.yaml` | Kimi-K2.5 | 无 PD 分离 | A2 (文件名) |
-| `Qwen3-235B-A22B-A2.yaml` | Qwen3-235B-A22B | 无 PD 分离 | A2 (文件名) |
+| YAML | 模型 | 平台 |
+|---|---|---|
+| `DeepSeek-V3_2-W8A8-EP.yaml` | DeepSeek-V3.2-W8A8 | A3 (env) |
+| `GLM5_1-W8A8-EP.yaml` | GLM-5.1-W8A8 | A3 (env) |
+| `Qwen3-235B-disagg-pd.yaml` | Qwen3-235B | 无标记 |
+| `Qwen3-VL-235B-disagg-pd.yaml` | Qwen3-VL-235B | 无标记 |
+| `Qwen3-235B-W8A8.yaml` | Qwen3-235B-W8A8 | 无标记 |
+| `Qwen3-235B-W8A8-EPLB.yaml` | Qwen3-235B-W8A8 | 无标记 |
+| `Qwen3-235B-W8A8-longseq.yaml` | Qwen3-235B-W8A8 | 无标记 |
+| `DeepSeek-R1-W8A8-EPLB.yaml` | DeepSeek-R1-W8A8 | 无标记 |
+| `DeepSeek-R1-W8A8-longseq.yaml` | DeepSeek-R1-W8A8 | 无标记 |
+| `DeepSeek-V3.1-BF16.yaml` | DeepSeek-V3.1 | 无标记 |
+| `Qwen3-235B-A22B.yaml` | Qwen3-235B-A22B | 无标记 |
+| `DeepSeek-V3_2-W8A8-A3-dual-nodes.yaml` | DeepSeek-V3.2 | A3 (env) |
+| `GLM5_1-W8A8-A2-dual-nodes.yaml` | GLM-5.1 | A2 (文件名) |
+| `GLM5_1-W8A8-A3-dual-nodes.yaml` | GLM-5.1 | A3 (文件名) |
+| `GLM5_2-W8A8-A3-dual-nodes.yaml` | GLM-5.2 | A3 (文件名) |
+| `Kimi-K2_5-W4A8-A2-dual-nodes.yaml` | Kimi-K2.5 | A2 (文件名) |
+| `Qwen3-235B-A22B-A2.yaml` | Qwen3-235B-A22B | A2 (文件名) |
 
-### 5.2 external_dp：外部 PD 分离（routing.type 字段）
+### 5.2 external_dp
 
-| YAML | 模型 | routing.type | 平台 |
-|---|---|---|---|
-| `GLM5_1-W8A8-EP-external.yaml` | GLM-5.1-W8A8 | `disaggregated_prefill` | A3 (env) |
+| YAML | 模型 | 平台 |
+|---|---|---|
+| `GLM5_1-W8A8-EP-external.yaml` | GLM-5.1-W8A8 | A3 (env) |
 
-**两种 PD 分离模式的区别**：
+**internal_dp 和 external_dp 的区别**：
 
 | | internal_dp | external_dp |
 |---|---|---|
@@ -532,7 +532,7 @@ MATRIX_OUTPUTS: '{
 | 类别 | A2 | A3 |
 |---|---|---|
 | **单节点模型** | 6 个 YAML：gemma4, gemma4-31b, qwen3-32b-int8, qwen3.5-27b, qwen3.5-397b-w4a8, qwen3-vl-32b | 19 个 YAML：DeepSeek-V3.2/V4/V4-Flash/R1, Kimi-K2/K2-Thinking, GLM-4.7/5.1, MiniMax, Qwen3-235B, Qwen3.5-122B/397B, Qwen3-VL-235B 等 |
-| **多节点** | 3 个 YAML：GLM-5.1, Kimi-K2.5, Qwen3-235B（全部是 `-dual-nodes`，**无 PD 分离**） | 11 个 YAML：DeepSeek-V3.2 EP, Qwen3-235B disagg/EPLB/longseq, DeepSeek-R1 longseq/EPLB, GLM-5.1/5.2, DeepSeek-V3.1 等（含 PD 分离） |
+| **多节点** | 3 个 YAML：GLM-5.1, Kimi-K2.5, Qwen3-235B（全部是 `-dual-nodes`） | 11 个 YAML：DeepSeek-V3.2 EP, Qwen3-235B disagg/EPLB/longseq, DeepSeek-R1 longseq/EPLB, GLM-5.1/5.2, DeepSeek-V3.1 等 |
 | **精度测试** | accuracy-group-1/3/4 + pr-accuracy-group-1/2（小模型精度） | 无独立精度组 |
 | **多卡测试** | 无 | 8 个 YAML：qwen3-30b-acc, qwen3.5-27b, qwen3-32b-int8, QuaRot 等 |
 | **算子测试** | multicard_ops_a2/ | multicard_ops_a3/ |
@@ -543,62 +543,7 @@ MATRIX_OUTPUTS: '{
 
 ---
 
-## 九、三个关键特性在 nightly 中的覆盖情况
-
-> 三个特性：**图模式**（torchair_graph / aclgraph）、**PD 分离**（disaggregated_prefill）、**池化**（kv_pool / kv_transfer / mooncake）
-
-### 9.1 PD 分离 — 有覆盖，但仅在 A3
-
-共 9 个 YAML 配置了 `disaggregated_prefill`，实际被 `nightly_config.yaml` 调度的：
-
-| YAML | 调度状态 | 平台 | 调度方式 |
-|---|---|---|---|
-| `DeepSeek-V3_2-W8A8-EP.yaml` | ✅ 已调度 | A3 | multi_node (4 节点) |
-| `DeepSeek-R1-W8A8-longseq.yaml` | ✅ 已调度 | A3 | double_node |
-| `Qwen3-235B-disagg-pd.yaml` | ✅ 已调度 | A3 | double_node |
-| `Qwen3-VL-235B-disagg-pd.yaml` | ✅ 已调度 | A3 | double_node |
-| `Qwen3-235B-W8A8-EPLB.yaml` | ✅ 已调度 | A3 | double_node |
-| `Qwen3-235B-W8A8-longseq.yaml` | ✅ 已调度 | A3 | double_node |
-| `DeepSeek-R1-W8A8-EPLB.yaml` | ❌ 未调度 | — | — |
-| `GLM5_1-W8A8-EP.yaml` | ❌ 未调度 | — | — |
-| `Qwen3-235B-W8A8.yaml` | ❌ 未调度 | — | — |
-
-**结论：nightly 中有 6 个 PD 分离 YAML 被调度，全部在 A3。A2 无任何 PD 分离测试。**
-
-### 9.2 图模式 — 几乎全覆盖
-
-25 个 YAML 包含 `compilation-config`（即 `torchair_graph`/`aclgraph`/`cudagraph_mode`），实际被调度的：
-
-| 平台 | 调度数量 | 详情 |
-|---|---|---|
-| **A2 单节点** | 6/6（全部） | qwen3-32b-int8, qwen3.5-27b, qwen3.5-397b-w4a8, gemma4, gemma4-31b, qwen3-vl-32b |
-| **A3 单节点** | 14/19（大部分） | DeepSeek-V3.2/V4/V4-Flash/R1, Kimi-K2.5, GLM-4.7/5.1, MiniMax, Qwen3-235B, Qwen3.5-122B/397B, Qwen3-VL-235B 等 |
-| **A3 多卡** | 6/8 | qwen3.5-27b, qwen3-32b-int8, QuaRot, qwen3-30b-a3b-w8a8 等 |
-
-**结论：图模式在 nightly 中覆盖极广，A2 和 A3 都有。几乎所有单节点模型测试都开启了图编译。**
-
-### 9.3 池化 — 完全没有覆盖
-
-```
-在 tests/e2e/nightly/ 下搜索 kv_pool / kv_transfer / mooncake：
-  → 仅在 multi_node/scripts/run.sh 中命中（工具脚本，非测试配置）
-  → 0 个 YAML 配置
-  → 0 个调度条目
-```
-
-**结论：池化在 nightly 中完全没有 e2e 覆盖。**
-
-### 9.4 汇总
-
-| 特性 | Nightly A2 | Nightly A3 |
-|---|---|---|
-| **PD 分离** | 无 | 6 个 YAML（multi_node + double_node） |
-| **图模式** | 全部 6 个单节点 | 14 个单节点 + 6 个多卡 |
-| **池化** | 无 | 无 |
-
----
-
-## 十、总结
+## 九、总结
 
 | 维度 | 详情 |
 |---|---|
@@ -607,8 +552,4 @@ MATRIX_OUTPUTS: '{
 | **多节点入口** | `test_multi_node.py`（internal_dp） / `test_external_dp.py`（external_dp） |
 | **算子上入口** | 直接 pytest（与 pull_request 相同） |
 | **平台标记** | YAML 中 `ASCEND_A3_ENABLE: "1"` 或文件名后缀 `-A2`/`-A3` |
-| **PD 分离** | 9 个 YAML 有 `disaggregated_prefill`，其中 6 个被调度（全部在 A3） |
-| **图模式** | 25 个 YAML 有图编译配置，几乎所有单节点测试都覆盖，A2/A3 均有 |
-| **池化** | 0 个 YAML 配置，0 个调度，完全没有 e2e 覆盖 |
-| **特殊节点** | `-dual-nodes` YAML 只是普通多节点，不是 PD 分离 |
 | **基准测试** | 可选 accuracy/performance benchmarks（通过 aisbench） |
