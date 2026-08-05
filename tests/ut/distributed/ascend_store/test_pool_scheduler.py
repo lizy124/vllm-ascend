@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,10 +21,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 import tests.ut.distributed.ascend_store._mock_deps  # noqa: F401, E402
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import (
     LoadSpec,
 )
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler import (
     KVPoolScheduler,
     LookupKeyClient,
     get_zmq_rpc_path_lookup,
@@ -40,7 +40,7 @@ def _patch_pool_scheduler_importlib():
     which imports the real backend classes and uses ``mock.patch`` (itself
     backed by importlib.import_module), is unaffected.
     """
-    with patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.importlib") as mock_importlib:
+    with patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.importlib") as mock_importlib:
         mock_importlib.import_module.return_value = MagicMock()
         yield
 
@@ -94,7 +94,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         config.model_config.get_num_layers.return_value = 2
         return config
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_get_num_new_matched_tokens_consumer_no_load(self, mock_client_cls):
         config = self._make_config(kv_role="kv_consumer")
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -103,7 +103,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         result = scheduler.get_num_new_matched_tokens(request, 0)
         self.assertEqual(result, (0, False))
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_get_num_new_matched_tokens_too_short(self, mock_client_cls):
         config = self._make_config(block_size=64)
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -112,7 +112,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         result = scheduler.get_num_new_matched_tokens(request, 0)
         self.assertEqual(result, (0, False))
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_get_num_new_matched_tokens_hit(self, mock_client_cls):
         config = self._make_config(block_size=16)
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -135,7 +135,7 @@ class TestKVPoolScheduler(unittest.TestCase):
             hbm_hit_tokens=16,
         )
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_get_num_new_matched_tokens_all_hit(self, mock_client_cls):
         config = self._make_config(block_size=16)
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -153,7 +153,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         self.assertEqual(scheduler.load_specs["r1"].kvpool_cached_tokens, 63)
         self.assertEqual(scheduler.load_specs["r1"].kvpool_store_skip_tokens, 64)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_get_num_new_matched_tokens_full_hbm_hit_skips_external_lookup(self, mock_client_cls):
         scheduler = KVPoolScheduler(self._make_config(block_size=16), use_layerwise=False)
         request = MagicMock()
@@ -165,7 +165,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         self.assertEqual(scheduler.get_num_new_matched_tokens(request, 64), (0, False))
         mock_client_cls.return_value.lookup.assert_not_called()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_get_num_new_matched_tokens_less_than_computed(self, mock_client_cls):
         config = self._make_config(block_size=16)
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -180,7 +180,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         need, _ = scheduler.get_num_new_matched_tokens(request, 32)
         self.assertEqual(need, 0)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_update_state_after_alloc_no_load_spec(self, mock_client_cls):
         config = self._make_config()
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -190,7 +190,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         scheduler.update_state_after_alloc(request, blocks, 0)
         self.assertIn("r1", scheduler._unfinished_request_ids)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_update_state_after_alloc_with_load(self, mock_client_cls):
         config = self._make_config(block_size=16)
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -208,7 +208,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         scheduler.update_state_after_alloc(request, blocks, 32)
         self.assertTrue(scheduler.load_specs["r1"].can_load)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_update_state_after_alloc_zero_external(self, mock_client_cls):
         config = self._make_config(block_size=16)
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -221,7 +221,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         scheduler.update_state_after_alloc(request, blocks, 0)
         self.assertFalse(scheduler.load_specs["r1"].can_load)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_request_finished_consumer_no_put(self, mock_client_cls):
         config = self._make_config(kv_role="kv_consumer")
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -230,7 +230,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         result = scheduler.request_finished(request, [1, 2, 3])
         self.assertEqual(result, (False, None))
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_request_finished_no_tracker(self, mock_client_cls):
         config = self._make_config()
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -241,11 +241,11 @@ class TestKVPoolScheduler(unittest.TestCase):
         result = scheduler.request_finished(request, [1, 2])
         self.assertEqual(result, (False, None))
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_request_finished_with_saved_tokens(self, mock_client_cls):
         config = self._make_config()
         scheduler = KVPoolScheduler(config, use_layerwise=False)
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import RequestTracker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import RequestTracker
 
         scheduler._request_trackers["r1"] = RequestTracker(
             req_id="r1",
@@ -258,11 +258,11 @@ class TestKVPoolScheduler(unittest.TestCase):
         delay, _ = scheduler.request_finished(request, [1, 2])
         self.assertTrue(delay)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_request_finished_empty_blocks(self, mock_client_cls):
         config = self._make_config()
         scheduler = KVPoolScheduler(config, use_layerwise=False)
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import RequestTracker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import RequestTracker
 
         scheduler._request_trackers["r1"] = RequestTracker(
             req_id="r1",
@@ -275,7 +275,7 @@ class TestKVPoolScheduler(unittest.TestCase):
         delay, _ = scheduler.request_finished(request, [])
         self.assertFalse(delay)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_get_num_new_matched_tokens_async(self, mock_client_cls):
         config = self._make_config(extra_config={"load_async": True})
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -316,7 +316,7 @@ class TestKVPoolSchedulerBuildMeta(unittest.TestCase):
         config.model_config.get_num_layers.return_value = 2
         return config
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_build_connector_meta_new_req(self, mock_client_cls):
         config = self._make_config()
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -351,12 +351,12 @@ class TestKVPoolSchedulerBuildMeta(unittest.TestCase):
         meta = scheduler.build_connector_meta(sched_output)
         self.assertTrue(len(meta.requests) >= 1)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_build_connector_meta_finished_req(self, mock_client_cls):
         config = self._make_config()
         scheduler = KVPoolScheduler(config, use_layerwise=False)
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import RequestTracker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import RequestTracker
 
         scheduler._request_trackers["r1"] = RequestTracker(
             req_id="r1",
@@ -377,7 +377,7 @@ class TestKVPoolSchedulerBuildMeta(unittest.TestCase):
         _meta = scheduler.build_connector_meta(sched_output)
         self.assertNotIn("r1", scheduler._request_trackers)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_build_connector_meta_consumer_skip_save(self, mock_client_cls):
         config = self._make_config(kv_role="kv_consumer")
         scheduler = KVPoolScheduler(config, use_layerwise=False)
@@ -405,12 +405,12 @@ class TestKVPoolSchedulerBuildMeta(unittest.TestCase):
         _meta = scheduler.build_connector_meta(sched_output)
         # Consumer with no consumer_is_to_put => force_skip_save
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_build_connector_meta_preempted(self, mock_client_cls):
         config = self._make_config()
         scheduler = KVPoolScheduler(config, use_layerwise=False)
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import RequestTracker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import RequestTracker
 
         scheduler._request_trackers["r1"] = RequestTracker(
             req_id="r1",
@@ -432,9 +432,9 @@ class TestKVPoolSchedulerBuildMeta(unittest.TestCase):
 
 
 class TestLookupKeyClient(unittest.TestCase):
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.make_zmq_socket")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.zmq")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.MsgpackEncoder")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.make_zmq_socket")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.zmq")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.MsgpackEncoder")
     def test_lookup(self, mock_encoder_cls, mock_zmq, mock_make_socket):
         config = MagicMock()
         config.parallel_config.data_parallel_rank = 0
@@ -460,8 +460,8 @@ class TestLookupKeyClient(unittest.TestCase):
             ],
         )
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.make_zmq_socket")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.zmq")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.make_zmq_socket")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.zmq")
     def test_close(self, mock_zmq, mock_make_socket):
         config = MagicMock()
         config.parallel_config.data_parallel_rank = 0
@@ -478,7 +478,7 @@ class TestLookupKeyClient(unittest.TestCase):
 class TestKVPoolSchedulerGenerateKeys(unittest.TestCase):
     """Test generate_keys method."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -529,7 +529,7 @@ class TestKVPoolSchedulerGenerateKeys(unittest.TestCase):
 class TestKVPoolSchedulerStoreQueryKeys(unittest.TestCase):
     """Test _generate_store_query_keys method."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -580,7 +580,7 @@ class TestKVPoolSchedulerStoreQueryKeys(unittest.TestCase):
 class TestKVPoolSchedulerGetStoreLookupHitTokens(unittest.TestCase):
     """Test _get_store_lookup_hit_tokens method."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -681,7 +681,7 @@ class TestKVPoolSchedulerStaticMethods(unittest.TestCase):
 class TestKVPoolSchedulerFloorGranularity(unittest.TestCase):
     """Test _floor_to_cache_transfer_granularity."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_floor(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -713,7 +713,7 @@ class TestKVPoolSchedulerFloorGranularity(unittest.TestCase):
 class TestKVPoolSchedulerGetSwClippedBlocks(unittest.TestCase):
     """Test get_sw_clipped_blocks."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_no_swa_blocks(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -740,7 +740,7 @@ class TestKVPoolSchedulerGetSwClippedBlocks(unittest.TestCase):
         result = scheduler.get_sw_clipped_blocks([[1, 2, 3]])
         self.assertEqual(result, [[1, 2, 3]])
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_with_swa_blocks(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -769,7 +769,7 @@ class TestKVPoolSchedulerGetSwClippedBlocks(unittest.TestCase):
         result = scheduler.get_sw_clipped_blocks([[1, 2, 3, 4, 5]])
         self.assertEqual(result, [[4, 5]])
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_empty_blocks(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -800,7 +800,7 @@ class TestKVPoolSchedulerGetSwClippedBlocks(unittest.TestCase):
 class TestKVPoolSchedulerGetSendingEventId(unittest.TestCase):
     """Test get_sending_event_id."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_increments(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -832,7 +832,7 @@ class TestKVPoolSchedulerGetSendingEventId(unittest.TestCase):
 class TestKVPoolSchedulerUpdateFinished(unittest.TestCase):
     """Test update_finished_sending and update_finished_recving."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -884,7 +884,7 @@ class TestKVPoolSchedulerUpdateFinished(unittest.TestCase):
 class TestKVPoolSchedulerBindBlockPool(unittest.TestCase):
     """Test bind_gpu_block_pool."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_bind(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -916,7 +916,7 @@ class TestKVPoolSchedulerBindBlockPool(unittest.TestCase):
 class TestKVPoolSchedulerUpdateConnectorOutput(unittest.TestCase):
     """Test update_connector_output."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -949,7 +949,7 @@ class TestKVPoolSchedulerUpdateConnectorOutput(unittest.TestCase):
         scheduler.sending_blocks = {1: [10, 20, 30]}
         scheduler._expected_worker_count = 2
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import (
             AscendStoreKVConnectorWorkerMetadata,
         )
 
@@ -968,7 +968,7 @@ class TestKVPoolSchedulerUpdateConnectorOutput(unittest.TestCase):
         scheduler.sending_blocks = {1: [10, 20]}
         scheduler._expected_worker_count = 2
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import (
             AscendStoreKVConnectorWorkerMetadata,
         )
 
@@ -985,7 +985,7 @@ class TestKVPoolSchedulerUpdateConnectorOutput(unittest.TestCase):
         scheduler.sending_events = {}
         scheduler.sending_blocks = {}
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import (
             AscendStoreKVConnectorWorkerMetadata,
         )
 
@@ -1007,7 +1007,7 @@ class TestKVPoolSchedulerUpdateConnectorOutput(unittest.TestCase):
 class TestKVPoolSchedulerRequestFinishedAllGroups(unittest.TestCase):
     """Test request_finished_all_groups."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls, kv_role="kv_producer"):
         config = MagicMock()
         config.kv_transfer_config.kv_role = kv_role
@@ -1047,7 +1047,7 @@ class TestKVPoolSchedulerRequestFinishedAllGroups(unittest.TestCase):
 
     def test_tracker_not_saved(self):
         scheduler = self._make_scheduler()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import RequestTracker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import RequestTracker
 
         scheduler._request_trackers["r1"] = RequestTracker("r1", 32, allocated_block_ids=[0, 1], num_saved_tokens=0)
         request = MagicMock()
@@ -1057,7 +1057,7 @@ class TestKVPoolSchedulerRequestFinishedAllGroups(unittest.TestCase):
 
     def test_delay_free_with_blocks(self):
         scheduler = self._make_scheduler()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import RequestTracker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import RequestTracker
 
         scheduler._request_trackers["r1"] = RequestTracker("r1", 32, allocated_block_ids=[0, 1], num_saved_tokens=32)
         request = MagicMock()
@@ -1068,7 +1068,7 @@ class TestKVPoolSchedulerRequestFinishedAllGroups(unittest.TestCase):
 
     def test_no_delay_empty_blocks(self):
         scheduler = self._make_scheduler()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import RequestTracker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import RequestTracker
 
         scheduler._request_trackers["r1"] = RequestTracker("r1", 32, allocated_block_ids=[0, 1], num_saved_tokens=32)
         request = MagicMock()
@@ -1080,7 +1080,7 @@ class TestKVPoolSchedulerRequestFinishedAllGroups(unittest.TestCase):
 class TestKVPoolSchedulerInferMambaGroups(unittest.TestCase):
     """Test _infer_mamba_groups."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def test_no_config(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -1109,7 +1109,7 @@ class TestKVPoolSchedulerInferMambaGroups(unittest.TestCase):
 class TestKVPoolSchedulerGetLayerwiseGvaHitTokens(unittest.TestCase):
     """Test _get_layerwise_gva_hit_tokens."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"
@@ -1187,7 +1187,7 @@ class TestKVPoolSchedulerGetLayerwiseGvaHitTokens(unittest.TestCase):
 class TestKVPoolSchedulerUpdateStateAfterAllocBranches(unittest.TestCase):
     """Test update_state_after_alloc additional branches."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler.LookupKeyClient")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler.LookupKeyClient")
     def _make_scheduler(self, mock_client_cls, extra_config=None):
         config = MagicMock()
         config.kv_transfer_config.kv_role = "kv_producer"

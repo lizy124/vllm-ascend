@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,13 +23,13 @@ from unittest.mock import MagicMock, patch
 
 import tests.ut.distributed.ascend_store._mock_deps  # noqa: F401, E402
 from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.backend import Backend
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend import (
     MooncakeStoreConfig,
     _convert_to_bytes,
     _parse_global_segment_size,
     _ssd_setup_kwargs,
 )
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.yuanrong_backend import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.yuanrong.yuanrong_backend import (
     YuanrongConfig,
     YuanrongHelper,
 )
@@ -343,7 +343,7 @@ class TestYuanrongHelper(unittest.TestCase):
 # =========================================================================
 class TestMooncakeBackendMethods(unittest.TestCase):
     def _make_backend(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend import MooncakeBackend
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend import MooncakeBackend
 
         with (
             patch.dict(os.environ, {"MOONCAKE_CONFIG_PATH": "/dev/null"}),
@@ -381,7 +381,7 @@ class TestMooncakeBackendMethods(unittest.TestCase):
         b = self._make_backend()
         b.store.batch_put_from_multi_buffers.side_effect = RuntimeError("backend fail")
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend.logger"
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend.logger"
         ) as mock_logger:
             b.put(["k1"], [[100]], [[10]])  # Should log error but not raise
         error_log = _format_log_call(mock_logger.error.call_args)
@@ -403,7 +403,7 @@ class TestMooncakeBackendMethods(unittest.TestCase):
         b = self._make_backend()
         b.store.batch_get_into_multi_buffers.side_effect = RuntimeError("backend fail")
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend.logger"
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend.logger"
         ) as mock_logger:
             b.get(["k1"], [[100]], [[10]])
         error_log = _format_log_call(mock_logger.error.call_args)
@@ -414,9 +414,9 @@ class TestMooncakeBackendMethods(unittest.TestCase):
         b = self._make_backend()
         with (
             patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend.global_te"
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend.global_te"
             ) as mock_te,
-            patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend.get_ip"),
+            patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend.get_ip"),
         ):
             b.register_buffer([100], [200])
             mock_te.register_buffer.assert_called_once()
@@ -427,7 +427,7 @@ class TestMooncakeBackendMethods(unittest.TestCase):
 # =========================================================================
 class TestYuanrongBackendMethods(unittest.TestCase):
     def _make_backend(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.yuanrong_backend import YuanrongBackend
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.yuanrong.yuanrong_backend import YuanrongBackend
 
         with patch.object(YuanrongBackend, "__init__", lambda self, pc: None):
             backend = YuanrongBackend.__new__(YuanrongBackend)
@@ -494,7 +494,7 @@ class TestYuanrongBackendMethods(unittest.TestCase):
         b = self._make_backend()
         b._hetero_client.mget_h2d.side_effect = RuntimeError("backend fail")
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.yuanrong_backend.logger"
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.yuanrong.yuanrong_backend.logger"
         ) as mock_logger:
             result = b.get(["k1"], [[100]], [[10]])
         error_log = _format_log_call(mock_logger.error.call_args)
@@ -516,7 +516,7 @@ class TestYuanrongBackendMethods(unittest.TestCase):
         b = self._make_backend()
         b._hetero_client.mset_d2h.side_effect = RuntimeError("backend fail")
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.yuanrong_backend.logger"
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.yuanrong.yuanrong_backend.logger"
         ) as mock_logger:
             b.put(["k1"], [[100]], [[10]])
         error_log = _format_log_call(mock_logger.error.call_args)
@@ -591,7 +591,7 @@ class TestYuanrongBackendMethods(unittest.TestCase):
 # =========================================================================
 class TestMemcacheBackendMethods(unittest.TestCase):
     def _make_backend(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.memcache_backend import MemcacheBackend
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.memcache.memcache_backend import MemcacheBackend
 
         with patch.object(MemcacheBackend, "__init__", lambda self, pc: None):
             backend = MemcacheBackend.__new__(MemcacheBackend)
@@ -628,7 +628,7 @@ class TestMemcacheBackendMethods(unittest.TestCase):
         b = self._make_backend()
         b.store.batch_get_into_layers.side_effect = RuntimeError("backend fail")
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.memcache_backend.logger"
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.memcache.memcache_backend.logger"
         ) as mock_logger:
             b.get(["k1"], [[100]], [[10]])
         error_log = _format_log_call(mock_logger.error.call_args)
@@ -650,7 +650,7 @@ class TestMemcacheBackendMethods(unittest.TestCase):
         b = self._make_backend()
         b.store.batch_put_from_layers.side_effect = RuntimeError("backend fail")
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.memcache_backend.logger"
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.memcache.memcache_backend.logger"
         ) as mock_logger:
             b.put(["k1"], [[100]], [[10]])
         error_log = _format_log_call(mock_logger.error.call_args)

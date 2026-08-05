@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,14 +17,14 @@
 backend_map = {
     "mooncake": {
         "name": "MooncakeBackend",
-        "path": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend",
+        "path": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend",
     },
     "memcache": {
         "name": "MemcacheBackend",
-        "path": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.memcache_backend",
+        "path": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.memcache.memcache_backend",
     },
     "yuanrong": {
         "name": "YuanrongBackend",
-        "path": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.yuanrong_backend",
+        "path": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.yuanrong.yuanrong_backend",
     },
 }

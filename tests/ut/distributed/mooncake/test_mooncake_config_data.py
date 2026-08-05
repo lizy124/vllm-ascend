@@ -1,4 +1,4 @@
-import sys
+﻿import sys
 import types
 import unittest
 from unittest.mock import MagicMock
@@ -10,7 +10,7 @@ fake_store = types.ModuleType("mooncake.store")
 fake_store.ReplicateConfig = MagicMock()  # type: ignore[attr-defined]
 sys.modules["mooncake.store"] = fake_store
 
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend import (  # noqa: E402
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend import (  # noqa: E402
     _convert_to_bytes,
     _parse_global_segment_size,
 )

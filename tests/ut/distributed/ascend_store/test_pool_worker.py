@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 import tests.ut.distributed.ascend_store._mock_deps  # noqa: F401, E402
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import (
     AscendConnectorMetadata,
     LoadSpec,
     ReqMeta,
@@ -30,7 +30,7 @@ class TestKVPoolWorkerHelpers(unittest.TestCase):
     """Test the pure helper methods on KVPoolWorker without full init."""
 
     def _make_worker_class(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         return KVPoolWorker
 
@@ -163,16 +163,16 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         config.kv_events_config = None
         return config
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_init_basic(self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib):
         mock_tp_rank.return_value = 0
         mock_tp_size.return_value = 1
@@ -187,7 +187,7 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         mock_importlib.import_module.return_value = mock_backend
 
         config = self._make_vllm_config()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
 
@@ -197,16 +197,16 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         self.assertFalse(worker.use_mla)
         self.assertEqual(worker.tp_rank, 0)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_init_mla(self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib):
         mock_tp_rank.return_value = 0
         mock_tp_size.return_value = 1
@@ -219,22 +219,22 @@ class TestKVPoolWorkerInit(unittest.TestCase):
 
         config = self._make_vllm_config()
         config.model_config.use_mla = True
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self.assertTrue(worker.use_mla)
         self.assertEqual(worker.num_kv_head, 1)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_init_kv_head_less_than_tp(
         self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib
     ):
@@ -249,22 +249,22 @@ class TestKVPoolWorkerInit(unittest.TestCase):
 
         config = self._make_vllm_config()
         config.model_config.get_total_num_kv_heads.return_value = 4  # < tp_size=8
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self.assertEqual(worker.put_step, 2)  # 8 / 4
         self.assertEqual(worker.head_or_tp_rank, 1)  # 2 // 2
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_get_kv_events_empty(
         self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib
     ):
@@ -278,22 +278,22 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         mock_importlib.import_module.return_value = MagicMock()
 
         config = self._make_vllm_config()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         events = worker.get_kv_events()
         self.assertEqual(events, [])
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_get_kv_events_with_send_thread(
         self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib
     ):
@@ -309,7 +309,7 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         config = self._make_vllm_config()
         config.kv_events_config = MagicMock()
         config.kv_events_config.enable_kv_cache_events = True
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         worker.kv_send_thread = MagicMock()
@@ -317,16 +317,16 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         events = worker.get_kv_events()
         self.assertEqual(len(events), 1)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_lookup_all_cached(
         self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib
     ):
@@ -340,23 +340,23 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         mock_importlib.import_module.return_value = MagicMock()
 
         config = self._make_vllm_config()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         worker.m_store.exists.return_value = [1, 1]
         result = worker.lookup(32, ["hash0", "hash1"], use_layerwise=False)
         self.assertEqual(result, 32)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_lookup_partial(
         self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib
     ):
@@ -370,23 +370,23 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         mock_importlib.import_module.return_value = MagicMock()
 
         config = self._make_vllm_config()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         worker.m_store.exists.return_value = [1, 0]
         result = worker.lookup(32, ["h0", "h1"], use_layerwise=False)
         self.assertEqual(result, 16)  # first non-exist at index 1 => starts[1]=16
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_lookup_exception(
         self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib
     ):
@@ -400,23 +400,23 @@ class TestKVPoolWorkerInit(unittest.TestCase):
         mock_importlib.import_module.return_value = MagicMock()
 
         config = self._make_vllm_config()
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         worker.m_store.exists.side_effect = Exception("conn error")
         result = worker.lookup(32, ["h0", "h1"], use_layerwise=False)
         self.assertEqual(result, 0)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib")
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank"
     )
     @patch(
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size"
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size"
     )
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank")
     def test_consumer_partition_config(
         self, mock_tp_rank, mock_tp_size, mock_pcp_group, mock_dcp_ws, mock_dcp_rank, mock_importlib
     ):
@@ -439,7 +439,7 @@ class TestKVPoolWorkerInit(unittest.TestCase):
             },
         )
         config.model_config.hf_text_config.num_hidden_layers = 32
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self.assertIsNotNone(worker.token_database.partitions)
@@ -453,23 +453,23 @@ class TestKVPoolWorkerRegisterAndTransfer(unittest.TestCase):
         """Return a dict of started patches."""
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -505,7 +505,7 @@ class TestKVPoolWorkerRegisterAndTransfer(unittest.TestCase):
     def _make_worker(self, kv_role="kv_producer", extra_config=None):
         self._patch_all()
         config = self._make_config(kv_role=kv_role, extra_config=extra_config)
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         return worker
@@ -531,9 +531,9 @@ class TestKVPoolWorkerRegisterAndTransfer(unittest.TestCase):
         self.assertEqual(len(worker.group_kv_caches_base_addr[0]), 2)
         worker.m_store.register_buffer.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.threading.Event")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.KVCacheStoreRecvingThread")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.KVCacheStoreSendingThread")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.threading.Event")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.KVCacheStoreRecvingThread")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.KVCacheStoreSendingThread")
     def test_transfer_threads_use_grouped_block_sizes(self, mock_send_thread, mock_recv_thread, mock_event):
         worker = self._make_worker(kv_role="kv_both", extra_config={"backend": "mooncake", "load_async": True})
         worker.grouped_block_size = [128, 8, 32]
@@ -599,7 +599,7 @@ class TestKVPoolWorkerRegisterAndTransfer(unittest.TestCase):
         worker.start_load_kv(meta)
         # No get called since no load_spec
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.KVCacheStoreRecvingThread")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.KVCacheStoreRecvingThread")
     def test_async_recv_thread_shares_invalid_block_state(self, mock_recv_thread_cls):
         worker = self._make_worker(
             kv_role="kv_consumer",
@@ -711,23 +711,23 @@ class TestKVPoolWorkerRegisterAndTransfer(unittest.TestCase):
         self._stop_all()
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=2,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -740,7 +740,7 @@ class TestKVPoolWorkerRegisterAndTransfer(unittest.TestCase):
 
         config = self._make_config()
         config.model_config.get_total_num_kv_heads.return_value = 2
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         # 2 blocks * 2 tp_ranks = 4 keys
@@ -753,12 +753,12 @@ class TestKVPoolWorkerStaticHelpers(unittest.TestCase):
     """Test static and standalone helper methods."""
 
     def test_uses_hybrid_kv_cache_none_config(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         self.assertFalse(KVPoolWorker._uses_hybrid_kv_cache(MagicMock(), None))
 
     def test_uses_hybrid_kv_cache_disabled(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         vllm_config = MagicMock()
         vllm_config.scheduler_config.disable_hybrid_kv_cache_manager = True
@@ -767,14 +767,14 @@ class TestKVPoolWorkerStaticHelpers(unittest.TestCase):
         self.assertFalse(KVPoolWorker._uses_hybrid_kv_cache(vllm_config, kv_cache_config))
 
     def test_uses_mamba_kv_cache_false_when_not_hybrid(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         self.assertFalse(KVPoolWorker._uses_mamba_kv_cache(False, None))
 
     def test_as_cache_tuple_tensor(self):
         import torch
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         t = torch.zeros(10)
         result = KVPoolWorker._as_cache_tuple(t)
@@ -784,7 +784,7 @@ class TestKVPoolWorkerStaticHelpers(unittest.TestCase):
     def test_as_cache_tuple_list(self):
         import torch
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         t1 = torch.zeros(10)
         t2 = torch.ones(10)
@@ -792,12 +792,12 @@ class TestKVPoolWorkerStaticHelpers(unittest.TestCase):
         self.assertEqual(len(result), 2)
 
     def test_get_group_family_out_of_range(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         self.assertEqual(KVPoolWorker._get_group_family(["a", "b"], 5), "default")
 
     def test_get_group_family_valid(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         self.assertEqual(KVPoolWorker._get_group_family(["a", "b"], 1), "b")
 
@@ -808,23 +808,23 @@ class TestKVPoolWorkerGetBlockIdsWithLoadErrors(unittest.TestCase):
     def _make_worker(self):
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -848,7 +848,7 @@ class TestKVPoolWorkerGetBlockIdsWithLoadErrors(unittest.TestCase):
         config.cache_config.block_size = 16
         config.kv_events_config = None
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self._patches = patches
@@ -879,23 +879,23 @@ class TestKVPoolWorkerGetGroupTpSize(unittest.TestCase):
     def _make_worker(self):
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=4,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -919,7 +919,7 @@ class TestKVPoolWorkerGetGroupTpSize(unittest.TestCase):
         config.cache_config.block_size = 16
         config.kv_events_config = None
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self._patches = patches
@@ -953,23 +953,23 @@ class TestKVPoolWorkerBuildConnectorWorkerMeta(unittest.TestCase):
     def _make_worker(self):
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -993,7 +993,7 @@ class TestKVPoolWorkerBuildConnectorWorkerMeta(unittest.TestCase):
         config.cache_config.block_size = 16
         config.kv_events_config = None
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self._patches = patches
@@ -1018,7 +1018,7 @@ class TestKVPoolWorkerBuildConnectorWorkerMeta(unittest.TestCase):
         worker = self._make_worker()
         worker.use_mamba = True
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer import KVCacheStoreSendingThread
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer import KVCacheStoreSendingThread
 
         send_thread = MagicMock(spec=KVCacheStoreSendingThread)
         send_thread.get_completed_events.return_value = {1: 2}
@@ -1032,7 +1032,7 @@ class TestKVPoolWorkerBuildConnectorWorkerMeta(unittest.TestCase):
         worker = self._make_worker()
         worker.use_mamba = True
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer import KVCacheStoreSendingThread
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer import KVCacheStoreSendingThread
 
         send_thread = MagicMock(spec=KVCacheStoreSendingThread)
         send_thread.get_completed_events.return_value = {}
@@ -1048,23 +1048,23 @@ class TestKVPoolWorkerGetFinishedAsync(unittest.TestCase):
     def _make_worker(self, kv_role="kv_consumer"):
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -1088,7 +1088,7 @@ class TestKVPoolWorkerGetFinishedAsync(unittest.TestCase):
         config.cache_config.block_size = 16
         config.kv_events_config = None
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self._patches = patches
@@ -1147,27 +1147,27 @@ class TestKVPoolWorkerInferGroupMethods(unittest.TestCase):
     """Test _infer_group_uses_align_state and _infer_group_block_sizes."""
 
     def test_infer_group_uses_align_state_no_config(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -1198,27 +1198,27 @@ class TestKVPoolWorkerInferGroupMethods(unittest.TestCase):
             p.stop()
 
     def test_get_group_block_size_out_of_range(self):
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -1256,23 +1256,23 @@ class TestKVPoolWorkerStartLoadKVAsync(unittest.TestCase):
     def _make_worker(self):
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -1296,7 +1296,7 @@ class TestKVPoolWorkerStartLoadKVAsync(unittest.TestCase):
         config.cache_config.block_size = 16
         config.kv_events_config = None
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         worker.load_async = True
@@ -1338,23 +1338,23 @@ class TestKVPoolWorkerProcessLayerData(unittest.TestCase):
     def _make_worker(self):
         patches = {
             "tp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=0,
             ),
             "tp_size": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=1,
             ),
-            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            "pcp_group": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             "dcp_ws": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             "dcp_rank": patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            "importlib": patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         }
         mocks = {}
         for name, p in patches.items():
@@ -1378,7 +1378,7 @@ class TestKVPoolWorkerProcessLayerData(unittest.TestCase):
         config.cache_config.block_size = 16
         config.kv_events_config = None
 
-        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+        from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
         worker = KVPoolWorker(config, use_layerwise=False)
         self._patches = patches
@@ -1469,23 +1469,23 @@ class TestKVPoolWorkerTpMismatch(unittest.TestCase):
     def _patches(self, tp_rank=0, tp_size=2):
         return [
             patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_rank",
                 return_value=tp_rank,
             ),
             patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_tensor_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_tensor_model_parallel_world_size",
                 return_value=tp_size,
             ),
-            patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_pcp_group"),
+            patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_pcp_group"),
             patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_world_size",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_world_size",
                 return_value=1,
             ),
             patch(
-                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.get_decode_context_model_parallel_rank",
+                "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.get_decode_context_model_parallel_rank",
                 return_value=0,
             ),
-            patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker.importlib"),
+            patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker.importlib"),
         ]
 
     def _start(self, patches):
@@ -1513,7 +1513,7 @@ class TestKVPoolWorkerTpMismatch(unittest.TestCase):
             cfg = self._make_vllm_config(
                 kv_role=kv_role, extra_config=extra_config, num_kv_heads=num_kv_heads, use_sparse=use_sparse
             )
-            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
             return KVPoolWorker(cfg, use_layerwise=use_layerwise)
         finally:
@@ -1572,7 +1572,7 @@ class TestKVPoolWorkerTpMismatch(unittest.TestCase):
                 kv_role="kv_consumer", extra_config={"backend": "mooncake", "prefill_tp_size": 4}, num_kv_heads=8
             )
             cfg.model_config.use_mla = True
-            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
             worker = KVPoolWorker(cfg, use_layerwise=False)
         finally:
@@ -1591,7 +1591,7 @@ class TestKVPoolWorkerTpMismatch(unittest.TestCase):
                 num_kv_heads=8,
                 use_sparse=True,
             )
-            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
             with self.assertRaises(ValueError):
                 KVPoolWorker(cfg, use_layerwise=False)
@@ -1606,7 +1606,7 @@ class TestKVPoolWorkerTpMismatch(unittest.TestCase):
             cfg = self._make_vllm_config(
                 kv_role="kv_consumer", extra_config={"backend": "mooncake", "prefill_tp_size": 4}, num_kv_heads=8
             )
-            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+            from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
             with self.assertRaises(ValueError):
                 KVPoolWorker(cfg, use_layerwise=True)

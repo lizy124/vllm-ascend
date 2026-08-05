@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -438,9 +438,9 @@ sys.modules["vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend"] 
 # relies on ``mock.patch`` (which itself calls importlib.import_module) resolving
 # those real modules.
 _backend_module_paths = {
-    "mooncake": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.mooncake_backend",
-    "memcache": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.memcache_backend",
-    "yuanrong": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.yuanrong_backend",
+    "mooncake": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.mooncake.mooncake_backend",
+    "memcache": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.memcache.memcache_backend",
+    "yuanrong": "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.yuanrong.yuanrong_backend",
 }
 _backend_pkg.backend_map = {  # type: ignore[attr-defined]
     "mooncake": {"name": "MooncakeBackend", "path": _backend_module_paths["mooncake"]},

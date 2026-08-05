@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2025 Huawei Technologies Co., Ltd. All Rights Reserved.
 # This file is a part of the vllm-ascend project.
 #
@@ -38,13 +38,13 @@ def register_connector():
 
     KVConnectorFactory.register_connector(
         "MooncakeConnectorStoreV1",
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector",
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector",
         "AscendStoreConnector",
     )
 
     KVConnectorFactory.register_connector(
         "AscendStoreConnector",
-        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector",
+        "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector",
         "AscendStoreConnector",
     )
 
@@ -55,7 +55,7 @@ def register_connector():
     )
 
     KVConnectorFactory.register_connector(
-        "UCMConnector", "vllm_ascend.distributed.kv_transfer.kv_pool.ucm_connector", "UCMConnectorV1"
+        "UCMConnector", "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ucm.ucm_connector", "UCMConnectorV1"
     )
 
     KVConnectorFactory.register_connector(

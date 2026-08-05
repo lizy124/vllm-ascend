@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,7 @@ from unittest.mock import MagicMock
 import tests.ut.distributed.ascend_store._mock_deps  # noqa: F401, E402
 from vllm.distributed.kv_events import BlockStored
 from vllm.v1.core.kv_cache_utils import maybe_convert_block_hash
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import (
     ChunkedTokenDatabase,
     KeyMetadata,
     LayerMultiBlockReqMeta,
@@ -33,7 +33,7 @@ from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import
 )
 
 # isort: on
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer import (
     KVCacheStoreLayerRecvingThread,
     KVCacheStoreLayerSendingThread,
     KVCacheStoreRecvingThread,

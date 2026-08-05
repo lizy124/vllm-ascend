@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,8 +23,8 @@ from unittest.mock import patch
 import tests.ut.distributed.ascend_store._mock_deps  # noqa: F401, E402
 import torch
 from vllm.v1.kv_cache_interface import FullAttentionSpec, KVCacheGroupSpec, SlidingWindowSpec
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import get_block_hashes
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.coordinator import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import get_block_hashes
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.coordinator import (
     AscendStoreCoordinator,
     ExternalCachedBlockPool,
 )
@@ -119,7 +119,7 @@ class TestAscendStoreCoordinator(unittest.TestCase):
         grouped_hash = get_block_hashes(block_hashes, group_block_size=128 * 128, hash_block_size=128)[0]
 
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.coordinator._get_manager_class",
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.coordinator._get_manager_class",
             return_value=_FakeCompressedManager,
         ):
             coord = AscendStoreCoordinator(
@@ -171,7 +171,7 @@ class TestAscendStoreCoordinator(unittest.TestCase):
         )
 
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.coordinator._reachable_block_mask",
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.coordinator._reachable_block_mask",
             return_value=[False, False, False, True],
         ):
             masks = coord.store_mask(512)
@@ -188,7 +188,7 @@ class TestAscendStoreCoordinator(unittest.TestCase):
             retention_interval=256,
         )
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.coordinator._reachable_block_mask",
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.coordinator._reachable_block_mask",
             return_value=[False, False, False, True],
         ) as reachable:
             masks = coord.lookup_mask(512)
@@ -216,7 +216,7 @@ class TestAscendStoreCoordinator(unittest.TestCase):
         )
 
         with patch(
-            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.coordinator._reachable_block_mask",
+            "vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.coordinator._reachable_block_mask",
             side_effect=fake_reachable_block_mask,
         ):
             masks = coord.store_mask(512)

@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (c) 2026 Huawei Technologies Co., Ltd. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,7 @@ from unittest.mock import MagicMock, patch
 # isort: off
 import tests.ut.distributed.ascend_store._mock_deps  # noqa: F401, E402
 from vllm.distributed.kv_events import KVCacheEvent
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector import (
     AscendStoreConnector,
     AscendStoreKVEvents,
 )
@@ -103,7 +103,7 @@ class TestAscendStoreConnector(unittest.TestCase):
         self.assertIsNone(result)
         self.assertEqual(metadata, original_metadata)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolScheduler")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolScheduler")
     def test_init_scheduler_role(self, mock_scheduler_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -115,8 +115,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         )
         mock_scheduler_cls.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_init_worker_role(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -129,7 +129,7 @@ class TestAscendStoreConnector(unittest.TestCase):
         mock_worker_cls.assert_called_once()
         mock_lookup_cls.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolScheduler")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolScheduler")
     def test_scheduler_methods_delegate(self, mock_scheduler_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -159,7 +159,7 @@ class TestAscendStoreConnector(unittest.TestCase):
         result = connector.request_finished(MagicMock(), [1, 2])
         self.assertEqual(result, (True, None))
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolScheduler")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolScheduler")
     def test_update_connector_output_no_events(self, mock_scheduler_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -174,7 +174,7 @@ class TestAscendStoreConnector(unittest.TestCase):
         connector.update_connector_output(output)
         self.assertIsNone(connector._kv_cache_events)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolScheduler")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolScheduler")
     def test_update_connector_output_with_events(self, mock_scheduler_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -194,7 +194,7 @@ class TestAscendStoreConnector(unittest.TestCase):
         connector.update_connector_output(output)
         self.assertIsNotNone(connector._kv_cache_events)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolScheduler")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolScheduler")
     def test_update_connector_output_accumulate(self, mock_scheduler_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -221,7 +221,7 @@ class TestAscendStoreConnector(unittest.TestCase):
         connector.update_connector_output(output2)
         self.assertIsNotNone(connector._kv_cache_events)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolScheduler")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolScheduler")
     def test_take_events(self, mock_scheduler_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -245,8 +245,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         self.assertEqual(len(result), 1)
         self.assertIsNone(connector._kv_cache_events)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_worker_methods(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -278,8 +278,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         done_s, done_r = connector.get_finished({"r1"})
         self.assertEqual(done_s, {"r1"})
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_wait_for_layer_load_not_layerwise(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config(extra_config={"use_layerwise": False})
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -292,8 +292,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         # Should return immediately without calling worker
         connector.wait_for_layer_load("layer_0")
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_save_kv_layer_not_layerwise(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config(extra_config={"use_layerwise": False})
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -306,8 +306,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         connector.save_kv_layer("layer_0", MagicMock(), MagicMock())
         # Should return immediately
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_save_kv_layer_consumer(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config(kv_role="kv_consumer", extra_config={"use_layerwise": True})
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -320,8 +320,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         connector.save_kv_layer("layer_0", MagicMock(), MagicMock())
         # Consumer should not save
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_wait_for_save_consumer(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config(kv_role="kv_consumer")
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -334,8 +334,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         connector.wait_for_save()
         mock_worker_cls.return_value.wait_for_save.assert_not_called()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_get_kv_connector_kv_cache_events_empty(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole
@@ -349,8 +349,8 @@ class TestAscendStoreConnector(unittest.TestCase):
         result = connector.get_kv_connector_kv_cache_events()
         self.assertIsNone(result)
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.LookupKeyServer")
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector.KVPoolWorker")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.LookupKeyServer")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector.KVPoolWorker")
     def test_get_kv_connector_kv_cache_events_with_events(self, mock_worker_cls, mock_lookup_cls):
         config = self._make_vllm_config()
         from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorRole

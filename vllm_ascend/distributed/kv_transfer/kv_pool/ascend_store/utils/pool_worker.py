@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import importlib
 import math
@@ -28,7 +28,7 @@ from vllm.v1.kv_cache_interface import (
 from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend import (
     backend_map,
 )
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import (
     AscendConnectorMetadata,
     AscendStoreKVConnectorWorkerMetadata,
     ChunkedTokenDatabase,
@@ -46,11 +46,11 @@ from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import
     infer_group_cache_families,
     infer_tp_mismatch_info,
 )
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.coordinator import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.coordinator import (
     AscendStoreCoordinator,
     ExternalCachedBlockPool,
 )
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer import (
     KVCacheStoreKeyLayerRecvingThread,
     KVCacheStoreKeyLayerSendingThread,
     KVCacheStoreLayerRecvingThread,

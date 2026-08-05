@@ -1,4 +1,4 @@
-# Copyright (c) 2025 Huawei Technologies Co., Ltd. All Rights Reserved.
+﻿# Copyright (c) 2025 Huawei Technologies Co., Ltd. All Rights Reserved.
 # Copyright 2023 The vLLM team.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,8 +29,8 @@ import torch
 if not hasattr(torch, "npu"):
     torch.npu = types.SimpleNamespace(Event=type("Event", (), {}))  # type: ignore[attr-defined]
 
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.ascend_store_connector import AscendStoreConnector
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer import record_failed_blocks
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.ascend_store_connector import AscendStoreConnector
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer import record_failed_blocks
 
 
 class TestRecordFailedBlocks(unittest.TestCase):
@@ -41,7 +41,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
     (i.e., those with non-zero return codes).
     """
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_all_blocks_succeed(self, mock_logger: MagicMock):
         """Test when all blocks are transferred successfully (all return codes are 0)."""
         block_ids: list[int] = [1, 2, 3, 4, 5]
@@ -53,7 +53,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(len(result), 0)
         mock_logger.error.assert_not_called()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_all_blocks_fail(self, mock_logger: MagicMock):
         """Test when all blocks fail to transfer (all return codes are non-zero)."""
         block_ids: list[int] = [1, 2, 3, 4, 5]
@@ -65,7 +65,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(len(result), 5)
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_partial_blocks_fail(self, mock_logger: MagicMock):
         """Test when some blocks fail and some succeed."""
         block_ids: list[int] = [1, 2, 3, 4, 5]
@@ -77,7 +77,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(len(result), 2)
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_empty_lists(self, mock_logger: MagicMock):
         """Test with empty block_ids and ret_codes."""
         block_ids: list[int] = []
@@ -88,7 +88,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(result, set())
         mock_logger.error.assert_not_called()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_single_block_succeed(self, mock_logger: MagicMock):
         """Test with a single block that succeeds."""
         block_ids: list[int] = [42]
@@ -99,7 +99,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(result, set())
         mock_logger.error.assert_not_called()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_single_block_fail(self, mock_logger: MagicMock):
         """Test with a single block that fails."""
         block_ids: list[int] = [42]
@@ -110,7 +110,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(result, {42})
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_negative_return_codes(self, mock_logger: MagicMock):
         """Test with negative return codes (error conditions)."""
         block_ids: list[int] = [1, 2, 3]
@@ -121,7 +121,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(result, {2, 3})
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_large_block_ids(self, mock_logger: MagicMock):
         """Test with large block ID values."""
         block_ids: list[int] = [1000000, 2000000, 3000000]
@@ -132,7 +132,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(result, {2000000})
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_mixed_error_codes(self, mock_logger: MagicMock):
         """Test with various non-zero error codes."""
         block_ids: list[int] = [10, 20, 30, 40, 50]
@@ -143,7 +143,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(result, {20, 30, 50})
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_logs_failed_blocks(self, mock_logger: MagicMock):
         """Test that failed blocks are logged."""
         block_ids: list[int] = [1, 2, 3]
@@ -159,7 +159,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         # The last argument is the failed blocks set
         self.assertEqual(call_args[-1], {2, 3})
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_no_log_when_all_succeed(self, mock_logger: MagicMock):
         """Test that no error is logged when all blocks succeed."""
         block_ids: list[int] = [1, 2, 3]
@@ -170,7 +170,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
         self.assertEqual(result, set())
         mock_logger.error.assert_not_called()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_non_hybrid_single_block_semantics(self, mock_logger: MagicMock):
         """Test non-hybrid callers still map one return code to one block."""
         block_ids: list[int] = [10, 11, 12]
@@ -185,7 +185,7 @@ class TestRecordFailedBlocks(unittest.TestCase):
 class TestRecordFailedBlocksEdgeCases(unittest.TestCase):
     """Additional edge case tests for record_failed_blocks."""
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_duplicate_block_ids_all_fail(self, mock_logger: MagicMock):
         """Test with duplicate block IDs that all fail."""
         # Note: This tests the behavior with duplicates
@@ -199,7 +199,7 @@ class TestRecordFailedBlocksEdgeCases(unittest.TestCase):
         self.assertEqual(result, {1, 2})
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_zero_block_id_with_failure(self, mock_logger: MagicMock):
         """Test with block ID 0 failing."""
         block_ids: list[int] = [0, 1, 2]
@@ -210,7 +210,7 @@ class TestRecordFailedBlocksEdgeCases(unittest.TestCase):
         self.assertEqual(result, {0})
         mock_logger.error.assert_called_once()
 
-    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.kv_transfer.logger")
+    @patch("vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.kv_transfer.logger")
     def test_consecutive_failures(self, mock_logger: MagicMock):
         """Test with consecutive block failures."""
         block_ids: list[int] = [100, 101, 102, 103, 104]

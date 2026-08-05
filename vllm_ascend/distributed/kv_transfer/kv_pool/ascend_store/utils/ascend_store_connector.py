@@ -1,4 +1,4 @@
-import threading
+﻿import threading
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
@@ -28,12 +28,12 @@ from vllm.v1.outputs import KVConnectorOutput
 from vllm.v1.request import Request
 from vllm.v1.serial_utils import MsgpackDecoder
 
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.config_data import AscendStoreKVConnectorWorkerMetadata
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_scheduler import (
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.config_data import AscendStoreKVConnectorWorkerMetadata
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_scheduler import (
     KVPoolScheduler,
     get_zmq_rpc_path_lookup,
 )
-from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.pool_worker import KVPoolWorker
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.utils.pool_worker import KVPoolWorker
 
 if TYPE_CHECKING:
     from vllm.distributed.kv_transfer.kv_connector.v1.base import KVConnectorHandshakeMetadata
