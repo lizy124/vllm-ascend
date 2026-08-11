@@ -1,0 +1,32 @@
+tests/ut/distributed/weight_transfer/test_packed_tensor.py
+  s_c382870db74ff7::t_4ca9b985363ef8 1-563
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "b3a1807f9822a3ebf197a32134020fbe6000c96a",
+  "prompts": {},
+  "sessions": {
+    "s_c382870db74ff7": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7ae8e33e86964ec3f578e8",
+        "model": "glm-5.2"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "tool_type": "builtin",
+        "runtime_client": "trae-tob-git-ai",
+        "source_scene": "agent",
+        "operation_id": "6a7af1463e86964ec3f57a31",
+        "dedupe_key": "6a7ae8e33e86964ec3f578e8:6a7af1463e86964ec3f57a31:afterEdit:3aa95bcb",
+        "edit_kind": "file_edit",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "tool_use_id": "6a7af1463e86964ec3f57a31",
+        "session_id": "6a7ae8e33e86964ec3f578e8",
+        "external_session_id": "6a7ae8e33e86964ec3f578e8",
+        "client_type": "ide"
+      }
+    }
+  }
+}
