@@ -1,0 +1,37 @@
+tests/ut/distributed/weight_transfer/test_packed_tensor.py
+  s_c382870db74ff7::t_d20fa3e62376b2 488-497
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "56bafd780e9077f1e4b904cfc72978d47057ae08",
+  "prompts": {},
+  "humans": {
+    "h_3eaf4948cd6ab4": {
+      "author": "lizy124 <1950471827@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_c382870db74ff7": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7ae8e33e86964ec3f578e8",
+        "model": "glm-5.2"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "operation_id": "6a7af5ae3e86964ec3f57ad0",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "dedupe_key": "6a7ae8e33e86964ec3f578e8:6a7af5ae3e86964ec3f57ad0:afterEdit:3aa95bcb",
+        "tool_use_id": "6a7af5ae3e86964ec3f57ad0",
+        "runtime_client": "trae-tob-git-ai",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "source_scene": "agent",
+        "tool_type": "builtin",
+        "external_session_id": "6a7ae8e33e86964ec3f578e8",
+        "session_id": "6a7ae8e33e86964ec3f578e8"
+      }
+    }
+  }
+}
