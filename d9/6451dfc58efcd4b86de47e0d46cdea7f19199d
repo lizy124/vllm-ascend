@@ -1,0 +1,43 @@
+tests/ut/distributed/weight_transfer/test_registry.py
+  s_f18d93dce0dbfa::t_5e09cade7e21ea 33-34,39-40,50-63
+  s_f18d93dce0dbfa::t_86aba23b15526d 64
+vllm_ascend/distributed/weight_transfer/registry.py
+  s_f18d93dce0dbfa::t_52d0ecb1fda050 19,36-48
+  s_f18d93dce0dbfa::t_2a6dabae78d2fe 87,89,96-103
+vllm_ascend/distributed/weight_transfer/__init__.py
+  s_f18d93dce0dbfa::t_ec275db81c5541 19,25-33
+examples/rl/rlhf_http_npu_ipc.py
+  s_f18d93dce0dbfa::t_e6376e5fa1bc14 43,49
+  s_f18d93dce0dbfa::t_fdf7945efbd36a 163-165,169
+examples/rl/rlhf_http_hccl.py
+  s_f18d93dce0dbfa::t_6b746a5236fc60 41,48,51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "d96451dfc58efcd4b86de47e0d46cdea7f19199d",
+  "prompts": {},
+  "sessions": {
+    "s_f18d93dce0dbfa": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a5d940cb0411aa248b02b81",
+        "model": "glm-5.2"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "runtime_client": "trae-tob-git-ai",
+        "edit_kind": "file_edit",
+        "tool_use_id": "6a7ac0b43e86964ec3f5760d",
+        "tool_type": "builtin",
+        "external_session_id": "6a5d940cb0411aa248b02b81",
+        "source_scene": "agent",
+        "session_id": "6a5d940cb0411aa248b02b81",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "operation_id": "6a7ac0b43e86964ec3f5760d",
+        "dedupe_key": "6a5d940cb0411aa248b02b81:6a7ac0b43e86964ec3f5760d:afterEdit:048a8ab8",
+        "client_type": "ide"
+      }
+    }
+  }
+}
