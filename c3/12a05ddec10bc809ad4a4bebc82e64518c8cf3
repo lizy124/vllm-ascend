@@ -1,0 +1,46 @@
+tests/ut/distributed/weight_transfer/test_packed_tensor.py
+  s_c382870db74ff7::t_37199ff53c24da 28
+  h_3eaf4948cd6ab4 521
+  s_c382870db74ff7::t_89ebca1901c918 246
+  s_c382870db74ff7::t_4058c5dcf82584 533-534,537
+  s_c382870db74ff7::t_99eededd0ce3d3 267,269
+  s_c382870db74ff7::t_61fe57c2ef9024 555-556,559
+  s_c382870db74ff7::t_1a34155c39b918 79-81
+  s_c382870db74ff7::t_e616e6c9c23aeb 567
+  s_c382870db74ff7::t_55bf183c30406a 319-320
+  s_c382870db74ff7::t_05ac8bd94aab23 520,522-524
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "c312a05ddec10bc809ad4a4bebc82e64518c8cf3",
+  "prompts": {},
+  "humans": {
+    "h_3eaf4948cd6ab4": {
+      "author": "lizy124 <1950471827@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_c382870db74ff7": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7ae8e33e86964ec3f578e8",
+        "model": "glm-5.2"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "session_id": "6a7ae8e33e86964ec3f578e8",
+        "dedupe_key": "6a7ae8e33e86964ec3f578e8:6a7affbd3e86964ec3f57c38:afterEdit:3aa95bcb",
+        "tool_use_id": "6a7affbd3e86964ec3f57c38",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "external_session_id": "6a7ae8e33e86964ec3f578e8",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_type": "builtin",
+        "operation_id": "6a7affbd3e86964ec3f57c38",
+        "edit_kind": "file_edit",
+        "client_type": "ide",
+        "source_scene": "agent"
+      }
+    }
+  }
+}
