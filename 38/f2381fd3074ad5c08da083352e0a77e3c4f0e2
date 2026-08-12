@@ -1,0 +1,40 @@
+tests/ut/distributed/weight_transfer/test_packed_tensor.py
+  s_c382870db74ff7::t_5dfb2f589ed53e 78-319,519-567
+  s_c382870db74ff7::t_95bf882e1db012 45,47,55,73,322,324,331,340-341,343-344,346-350,352,363-366,368-372,378-379,384-385,387-388,390-391,406-407,417,422-423,429-430,432-437,441,443,456,466,469-472,478,490,506,509,512-513,515,518,568-919
+  s_c382870db74ff7::t_a9d09c135fe934 60,491-500,510,514,516
+  s_c382870db74ff7::t_a991bf893edab3 1-44,46,48-54,56-59,61-72,74-77,320-321,323,325-330,332-339,342,345,351,353-362,367,373-377,380-383,386,389,392-405,408-416,418-421,424-428,431,438-440,442,444-455,457-465,467-468,473-477,479-489,501-505,507-508,511,517
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "38f2381fd3074ad5c08da083352e0a77e3c4f0e2",
+  "prompts": {},
+  "humans": {
+    "h_3eaf4948cd6ab4": {
+      "author": "lizy124 <1950471827@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_c382870db74ff7": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a7ae8e33e86964ec3f578e8",
+        "model": "glm-5.2"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "session_id": "6a7ae8e33e86964ec3f578e8",
+        "tool_use_id": "6a7bfc3b811d2f3bb8974960",
+        "external_session_id": "6a7ae8e33e86964ec3f578e8",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "tool_type": "builtin",
+        "edit_kind": "file_edit",
+        "dedupe_key": "6a7ae8e33e86964ec3f578e8:6a7bfc3b811d2f3bb8974960:afterEdit:3aa95bcb",
+        "operation_id": "6a7bfc3b811d2f3bb8974960",
+        "source_scene": "agent",
+        "client_type": "ide"
+      }
+    }
+  }
+}
