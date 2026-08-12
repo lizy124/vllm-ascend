@@ -351,6 +351,11 @@ _sched_output_mod.NewRequestData = MagicMock  # type: ignore[attr-defined]
 
 if _MOCK_VLLM_DEPS:
     sys.modules["vllm.envs"].VLLM_RPC_BASE_PATH = "/tmp/vllm_rpc"  # type: ignore[attr-defined]
+    _distributed_mod = sys.modules["vllm.distributed"]
+    _distributed_mod.get_pcp_group = MagicMock(return_value=types.SimpleNamespace(world_size=1, rank_in_group=0))  # type: ignore[attr-defined]
+    _distributed_mod.get_tensor_model_parallel_rank = MagicMock(return_value=0)  # type: ignore[attr-defined]
+    _distributed_mod.get_tensor_model_parallel_world_size = MagicMock(return_value=1)  # type: ignore[attr-defined]
+    _distributed_mod.get_tp_group = MagicMock(return_value=types.SimpleNamespace(broadcast=MagicMock()))  # type: ignore[attr-defined]
 
 # ---------------------------------------------------------------------------
 # Mock external backends

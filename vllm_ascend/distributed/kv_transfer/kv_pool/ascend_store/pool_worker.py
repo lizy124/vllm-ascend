@@ -15,6 +15,7 @@ from vllm.distributed import (
     get_pcp_group,
     get_tensor_model_parallel_rank,
     get_tensor_model_parallel_world_size,
+    get_tp_group,
 )
 from vllm.distributed.kv_events import BlockStored
 from vllm.logger import logger
@@ -147,6 +148,7 @@ class KVPoolWorker:
         self.use_layerwise = use_layerwise
         self.kv_role = vllm_config.kv_transfer_config.kv_role
         self.load_async = extra_config.get("load_async", False)
+        self.enable_mla_read_dedup = bool(extra_config.get("enable_mla_read_dedup", False))
         self._invalid_block_ids: set[int] = set()
         self._invalid_block_ids_lock = threading.Lock()
         self.consumer_is_to_put = extra_config.get("consumer_is_to_put", False)
@@ -338,6 +340,8 @@ class KVPoolWorker:
         # which keys it has already allocated and reuse those GVAs instead of
         # re-allocating them on every save step.
         self._allocated_gvas: dict[str, int] = {}
+        self._mla_read_dedup_tp_group = None
+        self._mla_read_dedup_cache_views: list[tuple[int, int, torch.Tensor]] | None = None
 
     def _init_layerwise_config(self) -> None:
         # Build mapping: physical_layer -> [(group_id, layer_idx_in_group), ...]
@@ -868,6 +872,231 @@ class KVPoolWorker:
         self.m_store.register_buffer(ptrs, lengths)
         self._start_kv_transfer_threads()
 
+    def _can_dedup_mla_read(self) -> bool:
+        return (
+            self.enable_mla_read_dedup
+            and self.use_mla
+            and self.put_step > 1
+            and self.put_step == self.tp_size
+            and not self.tp_mismatch
+            and not self.use_layerwise
+            and not self.load_async
+            and not self.use_sparse
+        )
+
+    def _build_load_entries(
+        self,
+        request: ReqMeta,
+        token_len: int,
+        load_group_ids: list[int],
+    ) -> tuple[list[str], list[list[int]], list[list[int]], list[int]]:
+        load_spec = request.load_spec
+        assert load_spec is not None
+        key_list: list[str] = []
+        addr_list: list[list[int]] = []
+        size_list: list[list[int]] = []
+        block_id_list: list[int] = []
+        load_masks = self.token_database.load_mask(request.block_hashes, token_len)
+        for group_id in load_group_ids:
+            if group_id >= len(request.block_ids_by_group):
+                continue
+            block_ids = request.block_ids_by_group[group_id]
+            group_block_size = self.grouped_block_size[group_id]
+            mask_num = load_spec.vllm_cached_tokens // group_block_size * group_block_size
+            skip_null = group_id < len(self.group_uses_align_state) and self.group_uses_align_state[group_id]
+
+            def chunk_filter(start: int, group_id=group_id, load_masks=load_masks) -> bool:
+                return self.token_database.mask_allows_chunk(load_masks, group_id, start)
+
+            for (
+                start,
+                end,
+                key,
+                _block_hash,
+                block_id,
+            ) in self.token_database.process_token_key_strings_with_block_ids(
+                token_len,
+                request.block_hashes,
+                block_ids,
+                mask_num,
+                kv_cache_group_id=group_id,
+                skip_null_blocks=skip_null,
+                chunk_filter=chunk_filter,
+            ):
+                addr, size, block_id = self.token_database.prepare_value(
+                    start,
+                    end,
+                    block_ids,
+                    kv_cache_group_id=group_id,
+                    block_id=block_id,
+                )
+                key_list.append(key)
+                addr_list.append(addr)
+                size_list.append(size)
+                block_id_list.append(block_id)
+        return key_list, addr_list, size_list, block_id_list
+
+    def _apply_load_failures(self, request: ReqMeta, block_id_list: list[int], ret: list[int] | None) -> None:
+        if ret is not None and not any(r != 0 for r in ret):
+            return
+        failed_ret = ret if ret is not None else [1] * len(block_id_list)
+        missing_block_ids = record_failed_blocks(block_id_list, failed_ret)
+        if len(request.block_ids_by_group) == 1:
+            self._invalid_block_ids.update(missing_block_ids)
+        elif missing_block_ids:
+            logger.error(
+                "KV load failed for hybrid request %s. "
+                "Skip invalid-block fallback to avoid scheduler crash. "
+                "failed_blocks=%s",
+                request.req_id,
+                missing_block_ids,
+            )
+
+    @staticmethod
+    def _total_transfer_bytes(size_list: list[list[int]]) -> int:
+        return sum(sum(sizes) for sizes in size_list)
+
+    def _get_mla_read_dedup_tp_group(self):
+        if self._mla_read_dedup_tp_group is None:
+            self._mla_read_dedup_tp_group = get_tp_group()
+        return self._mla_read_dedup_tp_group
+
+    def _get_cache_byte_views(self) -> list[tuple[int, int, torch.Tensor]]:
+        cache_views = self._mla_read_dedup_cache_views
+        if cache_views is not None:
+            return cache_views
+        cache_views = []
+        for cache_or_caches in self.kv_caches.values():
+            for cache in self._as_cache_tuple(cache_or_caches):
+                try:
+                    storage = cache.untyped_storage()
+                    base_addr = storage.data_ptr()
+                    nbytes = storage.nbytes()
+                    byte_view = torch.empty((), dtype=torch.uint8, device=cache.device).set_(
+                        storage,
+                        0,
+                        (nbytes,),
+                        (1,),
+                    )
+                except AttributeError:
+                    storage = cache.storage()
+                    base_addr = storage.data_ptr()
+                    nbytes = storage.size() * cache.element_size()
+                    byte_view = torch.empty((), dtype=torch.uint8, device=cache.device).set_(
+                        storage,
+                        0,
+                        (nbytes,),
+                        (1,),
+                    )
+                cache_views.append((base_addr, base_addr + nbytes, byte_view))
+        self._mla_read_dedup_cache_views = cache_views
+        return cache_views
+
+    def _addr_span_as_uint8(self, addr: int, size: int) -> torch.Tensor:
+        for base_addr, end_addr, byte_view in self._get_cache_byte_views():
+            if base_addr <= addr and addr + size <= end_addr:
+                offset = addr - base_addr
+                return byte_view[offset : offset + size]
+        raise RuntimeError(f"KV cache address span is not covered by registered cache tensors: {addr=}, {size=}")
+
+    def _validate_addr_spans(self, addr_list: list[list[int]], size_list: list[list[int]]) -> None:
+        for addrs, sizes in zip(addr_list, size_list, strict=True):
+            for addr, size in zip(addrs, sizes, strict=True):
+                self._addr_span_as_uint8(addr, size)
+
+    def _pack_from_addrs(self, addr_list: list[list[int]], size_list: list[list[int]]) -> torch.Tensor:
+        total_bytes = self._total_transfer_bytes(size_list)
+        first_cache = self._as_cache_tuple(next(iter(self.kv_caches.values())))[0]
+        payload = torch.empty(total_bytes, dtype=torch.uint8, device=first_cache.device)
+        offset = 0
+        for addrs, sizes in zip(addr_list, size_list, strict=True):
+            for addr, size in zip(addrs, sizes, strict=True):
+                span = self._addr_span_as_uint8(addr, size)
+                payload[offset : offset + size].copy_(span)
+                offset += size
+        return payload
+
+    def _unpack_to_addrs(
+        self,
+        payload: torch.Tensor,
+        addr_list: list[list[int]],
+        size_list: list[list[int]],
+    ) -> None:
+        offset = 0
+        for addrs, sizes in zip(addr_list, size_list, strict=True):
+            for addr, size in zip(addrs, sizes, strict=True):
+                span = self._addr_span_as_uint8(addr, size)
+                span.copy_(payload[offset : offset + size])
+                offset += size
+        if offset != payload.numel():
+            raise RuntimeError(f"MLA read dedup payload size mismatch: unpacked={offset}, payload={payload.numel()}")
+
+    def _normalize_get_ret(self, ret: list[int] | None, count: int) -> list[int]:
+        return list(ret) if ret is not None else [1] * count
+
+    def _load_kv_mla_dedup(
+        self,
+        request: ReqMeta,
+        token_len: int,
+        load_group_ids: list[int],
+    ) -> None:
+        key_list, addr_list, size_list, block_id_list = self._build_load_entries(request, token_len, load_group_ids)
+        if not key_list:
+            return
+        owner_tp_rank = 0
+        shift = owner_tp_rank % len(key_list)
+        key_list_c = _circular_shift(key_list, shift)
+        addr_list_c = _circular_shift(addr_list, shift)
+        size_list_c = _circular_shift(size_list, shift)
+        block_id_list_c = _circular_shift(block_id_list, shift)
+        self._validate_addr_spans(addr_list_c, size_list_c)
+        tp_group = self._get_mla_read_dedup_tp_group()
+        payload_nbytes = self._total_transfer_bytes(size_list_c)
+        first_cache = self._as_cache_tuple(next(iter(self.kv_caches.values())))[0]
+        is_owner = self.tp_rank == owner_tp_rank
+        ret: list[int] | None = None
+        if is_owner:
+            logger.debug(
+                "KV pool worker MLA dedup owner get request=%s token_len=%d groups=%s keys=%d sample_keys=%s",
+                request.req_id,
+                token_len,
+                load_group_ids,
+                len(key_list_c),
+                key_list_c[:3],
+            )
+            try:
+                ret = self.m_store.get(key_list_c, addr_list_c, size_list_c)
+            except Exception:
+                logger.exception("KV pool worker MLA dedup owner get failed request=%s", request.req_id)
+                ret = None
+            payload = self._pack_from_addrs(addr_list_c, size_list_c)
+        else:
+            payload = torch.empty(payload_nbytes, dtype=torch.uint8, device=first_cache.device)
+        if payload_nbytes > 0:
+            tp_group.broadcast(payload, src=owner_tp_rank)
+            if not is_owner:
+                self._unpack_to_addrs(payload, addr_list_c, size_list_c)
+        if is_owner:
+            ret_tensor = torch.tensor(
+                self._normalize_get_ret(ret, len(block_id_list_c)),
+                dtype=torch.int32,
+                device=first_cache.device,
+            )
+        else:
+            ret_tensor = torch.empty(len(block_id_list_c), dtype=torch.int32, device=first_cache.device)
+        tp_group.broadcast(ret_tensor, src=owner_tp_rank)
+        ret_list = ret_tensor.cpu().tolist()
+        self._apply_load_failures(request, block_id_list_c, ret_list)
+        logger.debug(
+            "KV pool worker MLA dedup get returned request=%s token_len=%d groups=%s keys=%d payload_bytes=%d owner=%s",
+            request.req_id,
+            token_len,
+            load_group_ids,
+            len(key_list_c),
+            payload_nbytes,
+            is_owner,
+        )
+
     def start_load_kv(self, metadata: AscendConnectorMetadata):
         self.current_layer = 0
         self.layerwise_retrievers: list[Any] = []
@@ -921,48 +1150,15 @@ class KVPoolWorker:
                 )
                 continue
 
-            addr_list = []
-            size_list = []
-            key_list = []
-            block_id_list: list[int] = []
-            load_masks = self.token_database.load_mask(request.block_hashes, token_len)
-            for group_id in load_group_ids:
-                if group_id >= len(request.block_ids_by_group):
-                    continue
-                block_ids = request.block_ids_by_group[group_id]
-                group_block_size = self.grouped_block_size[group_id]
-                mask_num = load_spec.vllm_cached_tokens // group_block_size * group_block_size
-                skip_null = group_id < len(self.group_uses_align_state) and self.group_uses_align_state[group_id]
+            if self._can_dedup_mla_read():
+                self._load_kv_mla_dedup(request, token_len, load_group_ids)
+                continue
 
-                def chunk_filter(start: int, group_id=group_id, load_masks=load_masks) -> bool:
-                    return self.token_database.mask_allows_chunk(load_masks, group_id, start)
-
-                for (
-                    start,
-                    end,
-                    key,
-                    _block_hash,
-                    block_id,
-                ) in self.token_database.process_token_key_strings_with_block_ids(
-                    token_len,
-                    request.block_hashes,
-                    block_ids,
-                    mask_num,
-                    kv_cache_group_id=group_id,
-                    skip_null_blocks=skip_null,
-                    chunk_filter=chunk_filter,
-                ):
-                    addr, size, block_id = self.token_database.prepare_value(
-                        start,
-                        end,
-                        block_ids,
-                        kv_cache_group_id=group_id,
-                        block_id=block_id,
-                    )
-                    key_list.append(key)
-                    addr_list.append(addr)
-                    size_list.append(size)
-                    block_id_list.append(block_id)
+            key_list, addr_list, size_list, block_id_list = self._build_load_entries(
+                request,
+                token_len,
+                load_group_ids,
+            )
             if not key_list:
                 continue
             key_list_c = _circular_shift(key_list, self.tp_rank % len(key_list))
@@ -978,36 +1174,7 @@ class KVPoolWorker:
                 key_list_c[:3],
             )
             ret = self.m_store.get(key_list_c, addr_list_c, size_list_c)
-            if ret is not None and any(r != 0 for r in ret):
-                missing_block_ids = record_failed_blocks(
-                    block_id_list_c,
-                    ret,
-                )
-                if len(request.block_ids_by_group) == 1:
-                    self._invalid_block_ids.update(missing_block_ids)
-                elif missing_block_ids:
-                    logger.error(
-                        "KV load failed for hybrid request %s. "
-                        "Skip invalid-block fallback to avoid scheduler crash. "
-                        "failed_blocks=%s",
-                        request.req_id,
-                        missing_block_ids,
-                    )
-            elif ret is None:
-                missing_block_ids = record_failed_blocks(
-                    block_id_list_c,
-                    [1] * len(block_id_list_c),
-                )
-                if len(request.block_ids_by_group) == 1:
-                    self._invalid_block_ids.update(missing_block_ids)
-                elif missing_block_ids:
-                    logger.error(
-                        "KV load failed for hybrid request %s. "
-                        "Skip invalid-block fallback to avoid scheduler crash. "
-                        "failed_blocks=%s",
-                        request.req_id,
-                        missing_block_ids,
-                    )
+            self._apply_load_failures(request, block_id_list_c, ret)
             logger.debug(
                 "KV pool worker backend get returned request=%s token_len=%d groups=%s keys=%d",
                 request.req_id,

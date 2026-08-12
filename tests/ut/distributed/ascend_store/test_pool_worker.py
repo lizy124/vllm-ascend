@@ -22,6 +22,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 
 import tests.ut.distributed.ascend_store._mock_deps  # noqa: F401, E402
+import torch
 from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.metadata import (
     AscendConnectorMetadata,
     LayerTransferTask,
@@ -155,8 +156,108 @@ class TestKVPoolWorkerHelpers(unittest.TestCase):
         self.assertFalse(worker.cache_coordinator.find_longest_cache_hit.call_args.kwargs["apply_eagle"])
         worker.token_database.process_tokens.assert_not_called()
 
+    def _make_minimal_mla_worker(self, tp_rank=0):
+        cls = self._make_worker_class()
+        worker = object.__new__(cls)
+        worker.enable_mla_read_dedup = True
+        worker.use_mla = True
+        worker.put_step = 2
+        worker.tp_size = 2
+        worker.tp_rank = tp_rank
+        worker.tp_mismatch = False
+        worker.use_layerwise = False
+        worker.load_async = False
+        worker.use_sparse = False
+        worker._invalid_block_ids = set()
+        worker._mla_read_dedup_tp_group = None
+        worker._mla_read_dedup_cache_views = None
+        worker.kv_caches = {"layer.0": torch.empty(16, dtype=torch.uint8)}
+        worker.m_store = MagicMock()
+        return worker
+
+    def test_can_dedup_mla_read_guard(self):
+        worker = self._make_minimal_mla_worker()
+        self.assertTrue(worker._can_dedup_mla_read())
+
+        worker.use_mla = False
+        self.assertFalse(worker._can_dedup_mla_read())
+        worker.use_mla = True
+        worker.put_step = 1
+        self.assertFalse(worker._can_dedup_mla_read())
+        worker.put_step = 2
+        worker.load_async = True
+        self.assertFalse(worker._can_dedup_mla_read())
+        worker.load_async = False
+        worker.use_layerwise = True
+        self.assertFalse(worker._can_dedup_mla_read())
+        worker.use_layerwise = False
+        worker.tp_mismatch = True
+        self.assertFalse(worker._can_dedup_mla_read())
+
+    def test_pack_unpack_addrs_roundtrip(self):
+        src = self._make_minimal_mla_worker()
+        dst = self._make_minimal_mla_worker()
+        src_buf = src.kv_caches["layer.0"]
+        dst_buf = dst.kv_caches["layer.0"]
+        src_buf.copy_(torch.arange(16, dtype=torch.uint8))
+        dst_buf.fill_(0)
+        addr_list = [[src_buf.data_ptr() + 2, src_buf.data_ptr() + 10]]
+        size_list = [[4, 3]]
+
+        payload = src._pack_from_addrs(addr_list, size_list)
+        dst_addr_list = [[dst_buf.data_ptr() + 5, dst_buf.data_ptr() + 1]]
+        dst._unpack_to_addrs(payload, dst_addr_list, size_list)
+
+        self.assertEqual(dst_buf[5:9].tolist(), [2, 3, 4, 5])
+        self.assertEqual(dst_buf[1:4].tolist(), [10, 11, 12])
+
+    def test_mla_dedup_owner_uses_owner_shift(self):
+        worker = self._make_minimal_mla_worker(tp_rank=0)
+        buf = worker.kv_caches["layer.0"]
+        worker._build_load_entries = MagicMock(
+            return_value=(
+                ["k0", "k1", "k2"],
+                [[buf.data_ptr()], [buf.data_ptr() + 1], [buf.data_ptr() + 2]],
+                [[1], [1], [1]],
+                [0, 1, 2],
+            )
+        )
+        worker._get_mla_read_dedup_tp_group = MagicMock(return_value=SimpleNamespace(broadcast=lambda tensor, src: None))
+        worker.m_store.get.return_value = [0, 0, 0]
+
+        worker._load_kv_mla_dedup(SimpleNamespace(req_id="r1", block_ids_by_group=[[0, 1, 2]]), 3, [0])
+
+        keys, _, _ = worker.m_store.get.call_args.args
+        self.assertEqual(keys, ["k0", "k1", "k2"])
+
+    def test_mla_dedup_peer_skips_backend_get_and_unpacks(self):
+        peer = self._make_minimal_mla_worker(tp_rank=1)
+        peer_buf = peer.kv_caches["layer.0"]
+        payload_bytes = torch.tensor([7, 8, 9], dtype=torch.uint8)
+        ret_values = torch.tensor([0], dtype=torch.int32)
+
+        def fake_broadcast(tensor, src):
+            if tensor.dtype == torch.uint8:
+                tensor.copy_(payload_bytes)
+            else:
+                tensor.copy_(ret_values)
+
+        peer._get_mla_read_dedup_tp_group = MagicMock(return_value=SimpleNamespace(broadcast=fake_broadcast))
+        peer._build_load_entries = MagicMock(
+            return_value=(
+                ["k0"],
+                [[peer_buf.data_ptr() + 4]],
+                [[3]],
+                [0],
+            )
+        )
+
+        peer._load_kv_mla_dedup(SimpleNamespace(req_id="r1", block_ids_by_group=[[0]]), 3, [0])
+
+        peer.m_store.get.assert_not_called()
+        self.assertEqual(peer_buf[4:7].tolist(), [7, 8, 9])
+
     def test_layerwise_multi_group_layout_includes_mtp(self):
-        import torch
         from vllm.v1.kv_cache_interface import FullAttentionSpec
 
         cls = self._make_worker_class()
