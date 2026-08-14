@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import importlib
-import math
 import threading
 import time
 from collections.abc import Generator
-from typing import Any
 
 import numpy as np
 import torch
@@ -117,7 +115,6 @@ class KVPoolWorker:
             self.compress_ratios = getattr(hf_config, "compress_ratios", None)
         self.use_compress = self.compress_ratios is not None
         self.dp_rank = parallel_config.data_parallel_rank
-
         self._init_parallelism_info(model_config, parallel_config)
         self._init_kv_transfer_config(vllm_config, extra_config, use_layerwise, kv_cache_config)
         self._init_key_head_config(model_config, parallel_config)
@@ -177,11 +174,8 @@ class KVPoolWorker:
         for group_block_size in self.grouped_block_size:
             assert group_block_size % self.hash_block_size == 0, "block_size must be divisible by hash_block_size"
         self.block_size = self.grouped_block_size[0]
-        self.lcm_block_size = math.lcm(*self.grouped_block_size)
         self.num_kv_cache_groups = len(self.grouped_block_size)
-        self.kv_cache_group_families = infer_group_cache_families(
-            kv_cache_groups, self.compress_ratios, self.hf_config
-        )
+        self.kv_cache_group_families = infer_group_cache_families(kv_cache_groups, self.compress_ratios, self.hf_config)
         self.group_uses_align_state = self._infer_group_uses_align_state()
         self.cache_transfer_granularity = infer_cache_transfer_granularity(
             self.grouped_block_size, self.kv_cache_group_families
@@ -191,12 +185,11 @@ class KVPoolWorker:
         self.layerwise_max_transfer_bytes = int(extra_config.get("layerwise_max_transfer_bytes", 0))
 
         logger.info(
-            "use_hybrid: %s, use_mamba: %s, num_kv_cache_groups: %s, hash_block_size: %s, lcm_block_size: %s",
+            "use_hybrid: %s, use_mamba: %s, num_kv_cache_groups: %s, hash_block_size: %s",
             self.use_hybrid,
             self.use_mamba,
             self.num_kv_cache_groups,
             self.hash_block_size,
-            self.lcm_block_size,
         )
 
     def _init_key_head_config(self, model_config, parallel_config) -> None:
@@ -309,7 +302,7 @@ class KVPoolWorker:
             )
 
         self.token_database = ChunkedTokenDatabase(
-            self.metadata, self.grouped_block_size, partitions, self.use_hybrid, self.hash_block_size
+            self.metadata, self.grouped_block_size, partitions, hash_block_size=self.hash_block_size
         )
         self.cache_coordinator = self._build_cache_coordinator(vllm_config)
         self.token_database.cache_coordinator = self.cache_coordinator
@@ -335,9 +328,7 @@ class KVPoolWorker:
 
     def _init_kv_events(self, vllm_config) -> None:
         kv_event_config = vllm_config.kv_events_config
-        self.enable_kv_events = False
-        if kv_event_config and kv_event_config.enable_kv_cache_events:
-            self.enable_kv_events = True
+        self.enable_kv_events = bool(kv_event_config and kv_event_config.enable_kv_cache_events)
 
     def _init_state_vars(self) -> None:
         self.kv_send_thread: KVTransferThread | None = None
@@ -455,8 +446,6 @@ class KVPoolWorker:
             builders.append(
                 LayerBatchBuilder(
                     self.token_database,
-                    self.my_key_index,
-                    self.num_ranks_per_layer,
                     group_page_size,
                     group_num_layers,
                     group_id=group_id,
@@ -483,9 +472,6 @@ class KVPoolWorker:
                     self.tp_rank,
                     self.tp_size,
                     self.dcp_size,
-                    self.put_step,
-                    self.my_key_index,
-                    self.num_ranks_per_layer,
                     self.page_size_bytes,
                     ready_event_sending,
                     self.num_layers,
@@ -523,8 +509,6 @@ class KVPoolWorker:
                     self.tp_rank,
                     self.tp_size,
                     self.dcp_size,
-                    self.my_key_index,
-                    self.num_ranks_per_layer,
                     self.page_size_bytes,
                     ready_event,
                     self.get_event,
@@ -629,7 +613,7 @@ class KVPoolWorker:
     def _uses_mamba_kv_cache(use_hybrid: bool, kv_cache_config: KVCacheConfig | None):
         if not use_hybrid or kv_cache_config is None:
             return False
-        return any([isinstance(g.kv_cache_spec, MambaSpec) for g in kv_cache_config.kv_cache_groups])
+        return any(isinstance(g.kv_cache_spec, MambaSpec) for g in kv_cache_config.kv_cache_groups)
 
     @staticmethod
     def _as_cache_tuple(cache_or_caches) -> tuple[torch.Tensor, ...]:
@@ -825,7 +809,6 @@ class KVPoolWorker:
 
     def start_load_kv(self, metadata: AscendConnectorMetadata):
         self.current_layer = 0
-        self.layerwise_retrievers: list[Any] = []
         if self.use_layerwise:
             self.next_layer_to_submit = 0
             # Transfer threads receive these lists by reference. Give every
@@ -984,9 +967,7 @@ class KVPoolWorker:
         # TODO(lf): Distribute KV block writes across ranks in the put_step group.
         if self.tp_rank % self.put_step != 0:
             return
-        block_size = get_effective_group_block_size(
-            self.grouped_block_size, self.kv_cache_group_families, group_id
-        )
+        block_size = get_effective_group_block_size(self.grouped_block_size, self.kv_cache_group_families, group_id)
         request_block_ranges = []
         for request in requests:
             if request.can_save is None or not request.can_save:
@@ -1044,9 +1025,7 @@ class KVPoolWorker:
         group_id: int = 0,
         layer_idx_in_group: int = 0,
     ) -> None:
-        block_size = get_effective_group_block_size(
-            self.grouped_block_size, self.kv_cache_group_families, group_id
-        )
+        block_size = get_effective_group_block_size(self.grouped_block_size, self.kv_cache_group_families, group_id)
         request_block_ranges = []
         for request in requests:
             if request.load_spec is None or not request.load_spec.can_load:
