@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, cast
@@ -11,6 +12,7 @@ from vllm.logger import logger
 from vllm.utils.math_utils import cdiv
 from vllm.v1.core.kv_cache_utils import BlockHash, BlockHashList
 from vllm.v1.core.sched.output import NewRequestData
+from vllm.v1.kv_cache_interface import FullAttentionSpec, UniformTypeKVCacheSpecs
 
 from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.attention_fence import AttentionComputeStartGate
 
@@ -188,6 +190,59 @@ def infer_cache_family_ratio(cache_family: str | None) -> int:
 
 def get_cache_family_granularity(block_size: int, cache_family: str | None) -> int:
     return block_size * infer_cache_family_ratio(cache_family)
+
+
+def uses_hybrid_kv_cache(scheduler_config: Any, kv_cache_groups: Sequence[Any] | None) -> bool:
+    return bool(
+        kv_cache_groups
+        and not getattr(scheduler_config, "disable_hybrid_kv_cache_manager", False)
+        and len(kv_cache_groups) > 1
+        and any(not isinstance(group.kv_cache_spec, FullAttentionSpec) for group in kv_cache_groups)
+    )
+
+
+def infer_group_block_sizes(
+    cache_block_size: int,
+    kv_cache_groups: Sequence[Any] | None,
+    use_hybrid: bool,
+) -> list[int]:
+    if not kv_cache_groups or not use_hybrid:
+        return [cache_block_size]
+
+    block_sizes: list[int] = []
+    for group in kv_cache_groups:
+        spec = group.kv_cache_spec
+        if isinstance(spec, UniformTypeKVCacheSpecs):
+            spec = next(iter(spec.kv_cache_specs.values()))
+        block_sizes.append(spec.block_size)
+    return block_sizes
+
+
+def get_group_cache_family(group_cache_families: Sequence[str], group_id: int) -> str:
+    return group_cache_families[group_id] if group_id < len(group_cache_families) else "default"
+
+
+def get_effective_group_block_size(
+    group_block_sizes: Sequence[int],
+    group_cache_families: Sequence[str],
+    group_id: int,
+) -> int:
+    return group_block_sizes[group_id] * max(
+        infer_cache_family_ratio(get_group_cache_family(group_cache_families, group_id)),
+        1,
+    )
+
+
+def infer_cache_transfer_granularity(
+    group_block_sizes: Sequence[int],
+    group_cache_families: Sequence[str],
+) -> int:
+    return math.lcm(
+        *(
+            get_cache_family_granularity(block_size, get_group_cache_family(group_cache_families, group_id))
+            for group_id, block_size in enumerate(group_block_sizes)
+        ),
+    )
 
 
 def _get_layer_compress_ratio(
