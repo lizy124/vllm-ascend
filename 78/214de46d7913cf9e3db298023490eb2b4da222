@@ -1,0 +1,75 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/kv_transfer.py
+  s_5eecdc38e57439::t_ccc68e6d7d849a 968
+  s_5eecdc38e57439::t_99f2aee3c1b9b3 1025-1030
+  s_5eecdc38e57439::t_bf3257eecaa624 896-907,914,922,928
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py
+  s_5eecdc38e57439::t_1626b89dd50cbf 35-37,888
+  s_5eecdc38e57439::t_c0e69dbfae45c9 144-145
+  s_5eecdc38e57439::t_f47a837e6e5185 878-880,883-887
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_5eecdc38e57439::t_0f442f06cd98c8 58-60
+  s_5eecdc38e57439::t_577594f7dd1c37 851
+  s_5eecdc38e57439::t_11bad731f84d77 594
+  s_5eecdc38e57439::t_ef7d92f16f8348 950-958
+  s_5eecdc38e57439::t_3fb183fa86193f 2049-2051,2064
+  s_5eecdc38e57439::t_bac904c27f3735 997-1063
+  s_5eecdc38e57439::t_8cc9c056d6299c 933-935
+  s_5eecdc38e57439::t_4310f6716590d0 1751,1756-1757,1763-1764
+  s_5eecdc38e57439::t_a7b2749f6d64fc 862
+  s_5eecdc38e57439::t_00b22c45c6094d 2032,2037
+  s_5eecdc38e57439::t_4b9d1b32ea0eaf 130-139
+  s_5eecdc38e57439::t_202e00241ae802 2153-2156
+tests/ut/distributed/ascend_store/_mock_deps.py
+  s_5eecdc38e57439::t_87e57bdd442ea6 68-71
+  s_5eecdc38e57439::t_d3acbc6c8f8896 86
+  s_5eecdc38e57439::t_2d338af665389b 164-174
+  s_5eecdc38e57439::t_49052a0f8d43f4 112-113
+  s_5eecdc38e57439::t_880d2c702501ba 138-163,175-199
+  s_5eecdc38e57439::t_845949c08ad25a 60-67
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/metrics.py
+  s_5eecdc38e57439::t_958237740cefef 1-210
+tests/ut/distributed/ascend_store/test_metrics.py
+  s_5eecdc38e57439::t_76f46f6f4cf4b2 1-197,199,201,203-221,223-246,249,252-348,351,354-403
+  s_5eecdc38e57439::t_5bd99ffbab17dc 349-350,352-353
+  s_5eecdc38e57439::t_bc343be64ed756 198,200,202
+  s_5eecdc38e57439::t_4ed021bd0101e9 247-248,250-251
+  s_5eecdc38e57439::t_63c763128e7ffd 222
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py
+  s_5eecdc38e57439::t_5a3b208e685778 37-40
+  s_5eecdc38e57439::t_598c6c165e3634 300-328
+  s_5eecdc38e57439::t_1f89958360b103 19-24
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "78214de46d7913cf9e3db298023490eb2b4da222",
+  "prompts": {},
+  "humans": {
+    "h_3eaf4948cd6ab4": {
+      "author": "lizy124 <1950471827@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_5eecdc38e57439": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8c07161bc36f6a179e2dac",
+        "model": "glm-5.3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "operation_id": "6a8d34248d68e54869cd8c92",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "session_id": "6a8c07161bc36f6a179e2dac",
+        "source_scene": "agent",
+        "tool_type": "builtin",
+        "external_session_id": "6a8c07161bc36f6a179e2dac",
+        "dedupe_key": "6a8c07161bc36f6a179e2dac:6a8d34248d68e54869cd8c92:afterEdit:360faa7c",
+        "tool_use_id": "6a8d34248d68e54869cd8c92",
+        "runtime_client": "trae-tob-git-ai"
+      }
+    }
+  }
+}
