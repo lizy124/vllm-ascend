@@ -1,0 +1,40 @@
+tests/ut/distributed/ascend_store/test_pool_worker.py
+  s_19d9f3f210b2ac::t_100552519e04a0 1616-1624
+  s_19d9f3f210b2ac::t_3efa966852d5c9 1554-1558,1562,1564-1567,1569-1576,1578-1579,1583-1593
+  s_19d9f3f210b2ac::t_070e6ab6710d9e 1440-1491,1493-1497,1501-1524,1527-1553,1559-1561,1563,1568,1577,1580-1582,1594-1615,1625-1657
+  s_19d9f3f210b2ac::t_dc000b493571eb 26-28
+  s_19d9f3f210b2ac::t_b18919f13773f3 1525-1526
+  s_19d9f3f210b2ac::t_39ba180333e21d 1492
+  s_19d9f3f210b2ac::t_7aebd7789b9b15 1498-1500
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_19d9f3f210b2ac::t_4526b60da74618 1199-1206,1208,1211,1220-1221
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "359851163c3a413c84b79c8b9147778648139922",
+  "prompts": {},
+  "sessions": {
+    "s_19d9f3f210b2ac": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8be93d1bc36f6a179e2a60",
+        "model": "glm-5.3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "edit_kind": "file_edit",
+        "client_type": "ide",
+        "tool_use_id": "6a8c03281bc36f6a179e2d29",
+        "external_session_id": "6a8be93d1bc36f6a179e2a60",
+        "source_scene": "agent",
+        "tool_type": "builtin",
+        "runtime_client": "trae-tob-git-ai",
+        "operation_id": "6a8c03281bc36f6a179e2d29",
+        "session_id": "6a8be93d1bc36f6a179e2a60",
+        "dedupe_key": "6a8be93d1bc36f6a179e2a60:6a8c03281bc36f6a179e2d29:afterEdit:ae1e1ff0",
+        "tool_id": "icube:applyChatSnapshotPatch"
+      }
+    }
+  }
+}
