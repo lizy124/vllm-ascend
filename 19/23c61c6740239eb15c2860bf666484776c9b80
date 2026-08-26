@@ -1,0 +1,32 @@
+tests/ut/distributed/ascend_store/_mock_deps.py
+  s_5eecdc38e57439::t_fc4e8778c953a4 180
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "1923c61c6740239eb15c2860bf666484776c9b80",
+  "prompts": {},
+  "sessions": {
+    "s_5eecdc38e57439": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8c07161bc36f6a179e2dac",
+        "model": "DeepSeek-V4-Flash-Official"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "session_id": "6a8c07161bc36f6a179e2dac",
+        "dedupe_key": "6a8c07161bc36f6a179e2dac:6a8e54518d68e54869cd904d:afterEdit:360faa7c",
+        "tool_type": "builtin",
+        "source_scene": "agent",
+        "client_type": "ide",
+        "tool_use_id": "6a8e54518d68e54869cd904d",
+        "external_session_id": "6a8c07161bc36f6a179e2dac",
+        "runtime_client": "trae-tob-git-ai",
+        "edit_kind": "file_edit",
+        "operation_id": "6a8e54518d68e54869cd904d"
+      }
+    }
+  }
+}
