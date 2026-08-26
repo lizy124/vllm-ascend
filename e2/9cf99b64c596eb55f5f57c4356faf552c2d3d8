@@ -1,0 +1,33 @@
+tests/ut/distributed/ascend_store/_mock_deps.py
+  s_5eecdc38e57439::t_65d5c3d2853c3c 159,165-173,183,190-193
+tests/ut/distributed/ascend_store/test_ascend_store_connector.py
+  s_5eecdc38e57439::t_0d105309404003 362
+tests/ut/distributed/ascend_store/test_metrics.py
+  s_5eecdc38e57439::t_be1800f1422ddc 234-235
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py
+  s_5eecdc38e57439::t_45f0d8ceef3238 37,318,329
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/kv_transfer.py
+  s_5eecdc38e57439::t_06c1d637af22c6 904,1023-1024
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/metrics.py
+  s_5eecdc38e57439::t_61a34e524d6e65 41,86,88,153,184,187
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py
+  s_5eecdc38e57439::t_5756eb8c1babf7 54-56
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_5eecdc38e57439::t_8f1990de443390 79-81,950,1044,2044
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "e29cf99b64c596eb55f5f57c4356faf552c2d3d8",
+  "prompts": {},
+  "sessions": {
+    "s_5eecdc38e57439": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8c07161bc36f6a179e2dac",
+        "model": "deepseek_v4_flash_official__dev"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    }
+  }
+}
