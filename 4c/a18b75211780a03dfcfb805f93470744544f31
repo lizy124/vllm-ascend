@@ -1,0 +1,41 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py
+  s_5eecdc38e57439::t_90e2143819a18c 215
+  s_5eecdc38e57439::t_fa2e5b646fb918 246
+  s_5eecdc38e57439::t_f94fee0cbbc16e 258
+  s_5eecdc38e57439::t_4f1daab690414e 269
+  s_5eecdc38e57439::t_577365a7b8ebca 293
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "4ca18b75211780a03dfcfb805f93470744544f31",
+  "prompts": {},
+  "humans": {
+    "h_3eaf4948cd6ab4": {
+      "author": "lizy124 <1950471827@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_5eecdc38e57439": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8c07161bc36f6a179e2dac",
+        "model": "DeepSeek-V4-Flash-Official"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "operation_id": "6a8e52a08d68e54869cd9024",
+        "edit_kind": "file_edit",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_type": "builtin",
+        "source_scene": "agent",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "dedupe_key": "6a8c07161bc36f6a179e2dac:6a8e52a08d68e54869cd9024:afterEdit:d900cbd3",
+        "external_session_id": "6a8c07161bc36f6a179e2dac",
+        "session_id": "6a8c07161bc36f6a179e2dac",
+        "tool_use_id": "6a8e52a08d68e54869cd9024",
+        "client_type": "ide"
+      }
+    }
+  }
+}
