@@ -1,0 +1,54 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py
+  s_91656997ede36b::t_b2ee50a829cbc8 94-96
+  s_91656997ede36b::t_5a7bff3912ca0e 31-32
+  s_91656997ede36b::t_5c5992dd0d8864 33
+tests/ut/distributed/ascend_store/_mock_deps.py
+  s_91656997ede36b::t_06776cfc70b914 453-465,467-469
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/layerwise_cache_layout.py
+  s_91656997ede36b::t_13aa8604a0a165 102
+  s_91656997ede36b::t_0d1136d47fa6f5 17-20
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py
+  s_91656997ede36b::t_5a2640e9682676 28
+  s_91656997ede36b::t_854aa16607ba9e 164
+tests/ut/distributed/ascend_store/test_ascend_store_connector.py
+  s_91656997ede36b::t_1a524823e524e4 378-382
+  s_91656997ede36b::t_e56d11c6def03d 383-387,389-394
+  s_91656997ede36b::t_aee008eb54adff 362-377,388,395
+tests/ut/distributed/ascend_store/test_backend.py
+  s_91656997ede36b::t_25e2982eae1f10 26-31
+  s_91656997ede36b::t_9c1c327092e21e 60-92
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_91656997ede36b::t_9dc8e79b05498d 34
+  s_91656997ede36b::t_7eceaba08f06a6 158
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/__init__.py
+  s_91656997ede36b::t_8aa3ca0f1e6785 31-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "f636716458017b2ead45a625c7e1b0e14de7d570",
+  "prompts": {},
+  "sessions": {
+    "s_91656997ede36b": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8fe82b8d68e54869cd9318",
+        "model": "glm-5.3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "tool_use_id": "6a9253c38d68e54869cd97c4",
+        "source_scene": "agent",
+        "session_id": "6a8fe82b8d68e54869cd9318",
+        "external_session_id": "6a8fe82b8d68e54869cd9318",
+        "client_type": "ide",
+        "dedupe_key": "6a8fe82b8d68e54869cd9318:6a9253c38d68e54869cd97c4:afterEdit:743796df",
+        "operation_id": "6a9253c38d68e54869cd97c4",
+        "tool_type": "builtin",
+        "edit_kind": "file_edit",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "runtime_client": "trae-tob-git-ai"
+      }
+    }
+  }
+}
