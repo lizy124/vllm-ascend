@@ -1,0 +1,44 @@
+tests/ut/distributed/ascend_store/test_gva_protocol.py
+  s_91656997ede36b::t_73a963f21fc15e 351
+  s_91656997ede36b::t_08c7bb1bac406e 302-303,320-321,333-338,341,347-350
+  s_91656997ede36b::t_d9230156ed9ca0 39-41,44,47,54-55
+  s_91656997ede36b::t_efca1aab8a4d3a 182
+  s_91656997ede36b::t_a96e030ea83f9b 214-215,224-226,239-240
+  s_91656997ede36b::t_2582b99382ea0a 389,406-409,418-432,440,450
+  s_91656997ede36b::t_5279d263fc815f 1-38,42-43,45-46,48-53,56-181,183-213,216-223,227-238,241-301,304-319,322-332,339-340,342-346,352-388,390-405,410-417,433-439,441-449,451-459
+  s_91656997ede36b::t_2d2701e53046c7 460-462
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/metadata.py
+  s_91656997ede36b::t_f7d977647dfd2c 705-725
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/gva_protocol.py
+  s_91656997ede36b::t_1d9678e3ba1f1c 213
+  s_91656997ede36b::t_9007772ffd39a6 1-212,214-667
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "e788a10a1f7acb72d93874759245051caf49fa73",
+  "prompts": {},
+  "sessions": {
+    "s_91656997ede36b": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8fe82b8d68e54869cd9318",
+        "model": "glm-5.3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "client_type": "ide",
+        "tool_type": "builtin",
+        "source_scene": "agent",
+        "edit_kind": "file_edit",
+        "operation_id": "6a9263ee8d68e54869cd997a",
+        "runtime_client": "trae-tob-git-ai",
+        "external_session_id": "6a8fe82b8d68e54869cd9318",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "dedupe_key": "6a8fe82b8d68e54869cd9318:6a9263ee8d68e54869cd997a:afterEdit:f4ae6dc8",
+        "tool_use_id": "6a9263ee8d68e54869cd997a",
+        "session_id": "6a8fe82b8d68e54869cd9318"
+      }
+    }
+  }
+}
