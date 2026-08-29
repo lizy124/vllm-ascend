@@ -1,0 +1,41 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/memcache_backend.py
+  s_91656997ede36b::t_36f0a361895d66 13,70
+  s_91656997ede36b::t_3c59acf4aab256 41,62-69
+tests/ut/distributed/ascend_store/test_backend.py
+  s_91656997ede36b::t_6b04b633c3546b 22,33-36
+  s_91656997ede36b::t_5918ba0a0ad00a 96-123,125-175
+  s_91656997ede36b::t_863e72a3d48354 742-756
+  s_91656997ede36b::t_5b63e2cea13a66 124
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/base.py
+  s_91656997ede36b::t_50d91e66fad243 9-38,66-68
+  s_91656997ede36b::t_c9f1213f365606 65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "45badca5a5f22d6c402263ccde902339e6781339",
+  "prompts": {},
+  "sessions": {
+    "s_91656997ede36b": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8fe82b8d68e54869cd9318",
+        "model": "glm-5.3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "external_session_id": "6a8fe82b8d68e54869cd9318",
+        "edit_kind": "file_edit",
+        "tool_type": "builtin",
+        "dedupe_key": "6a8fe82b8d68e54869cd9318:6a9256028d68e54869cd9850:afterEdit:544ee040",
+        "operation_id": "6a9256028d68e54869cd9850",
+        "client_type": "ide",
+        "session_id": "6a8fe82b8d68e54869cd9318",
+        "source_scene": "agent",
+        "tool_use_id": "6a9256028d68e54869cd9850",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "runtime_client": "trae-tob-git-ai"
+      }
+    }
+  }
+}
