@@ -26,6 +26,10 @@ from vllm.v1.serial_utils import MsgpackEncoder
 from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend import (
     backend_map,
 )
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.gva_protocol import (
+    GVAKeyFactory,
+    use_gva_layerwise,
+)
 from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.layerwise_cache_layout import (
     build_layerwise_cache_layout,
     build_layerwise_reuse_layout,
@@ -158,9 +162,10 @@ class KVPoolScheduler:
         )
         self.tp_mismatch = tp_mismatch_info.enabled
 
-        backend_name = vllm_config.kv_transfer_config.kv_connector_extra_config.get("backend", "mooncake")
+        extra_config = vllm_config.kv_transfer_config.kv_connector_extra_config
+        self.use_gva_layerwise = use_gva_layerwise(self.use_layerwise, extra_config)
+        backend_name = extra_config.get("backend", "mooncake")
         self.backend_name = backend_name.lower()
-        self.use_gva_layerwise = self.use_layerwise and self.backend_name == "memcache"
         backend = backend_map.get(self.backend_name)
         if backend is None:
             raise ValueError(f"Unsupported KV pool backend: {backend_name}")
@@ -311,10 +316,13 @@ class KVPoolScheduler:
         group share one key for MLA).
         """
         head_or_tp_ranks = self.tp_size // self.put_step
-        if len(self.kv_cache_group_ids) > 1:
-            return [f"{self.model_name}@{group_id}@{block_hash_hex}@{h}" for h in range(head_or_tp_ranks)]
-        else:
-            return [f"{self.model_name}@{block_hash_hex}@{h}" for h in range(head_or_tp_ranks)]
+        return GVAKeyFactory.hit_check_keys(
+            self.model_name,
+            group_id,
+            block_hash_hex,
+            head_or_tp_ranks,
+            len(self.kv_cache_group_ids),
+        )
 
     def _get_layerwise_gva_hit_tokens(
         self,
