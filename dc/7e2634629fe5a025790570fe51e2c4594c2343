@@ -1,0 +1,21 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py
+  s_91656997ede36b::t_212f33c926aa37 30-32,215-230,404-405
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_91656997ede36b::t_0c39e842597722 34-36,74,422-446,801-802,828-830,1007,1073,1202-1204,1260-1263
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "dc7e2634629fe5a025790570fe51e2c4594c2343",
+  "prompts": {},
+  "sessions": {
+    "s_91656997ede36b": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a8fe82b8d68e54869cd9318",
+        "model": "glm-5.3__dev"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    }
+  }
+}
