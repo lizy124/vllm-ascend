@@ -14,6 +14,10 @@ from vllm.v1.kv_cache_interface import (
     UniformTypeKVCacheSpecs,
 )
 
+from vllm_ascend.distributed.kv_transfer.kv_pool.ascend_store.backend.gva_protocol import (
+    use_gva_layerwise,
+)
+
 _NUM_SHARED_BUFFERS = "layerwise_num_shared_buffers"
 _PREFETCH_LAYERS = "layerwise_prefetch_layers"
 _INDEPENDENT_LAYERS = "layerwise_independent_layers"
@@ -95,9 +99,7 @@ def get_gva_layerwise_config(kv_transfer_config: Any) -> dict[str, Any] | None:
         ):
             continue
         extra_config = connector_config.get("kv_connector_extra_config") or {}
-        if str(extra_config.get("backend", "mooncake")).lower() == "memcache" and extra_config.get(
-            "use_layerwise", False
-        ):
+        if use_gva_layerwise(extra_config.get("use_layerwise", False), extra_config):
             return extra_config
     return None
 
