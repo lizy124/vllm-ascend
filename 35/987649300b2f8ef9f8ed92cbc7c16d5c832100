@@ -1,0 +1,47 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/kv_transfer.py
+  s_d4134898a8c0bf::t_38bab25cb26cc2 1463
+  s_d4134898a8c0bf::t_99e8a7bbae443f 1487-1489
+  s_d4134898a8c0bf::t_f46f6935cc1787 1332-1334
+  s_d4134898a8c0bf::t_c9f2763092fd81 1322
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/ascend_store_connector.py
+  s_d4134898a8c0bf::t_10c3866d520e99 199,201-202
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_d4134898a8c0bf::t_b0969cc3bf1aa4 478
+  s_d4134898a8c0bf::t_6e8b01d03d9604 468-469,475-477,479
+tests/ut/distributed/ascend_store/test_kv_transfer.py
+  s_d4134898a8c0bf::t_1973b05a3fdd94 288-290
+  s_d4134898a8c0bf::t_c375bc2880c04d 222-224
+tests/ut/distributed/ascend_store/test_ascend_store_connector.py
+  s_d4134898a8c0bf::t_deac633eea92a2 263
+tests/ut/distributed/ascend_store/test_pool_worker.py
+  s_d4134898a8c0bf::t_d88bd10bcdcd54 1008-1022
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "35987649300b2f8ef9f8ed92cbc7c16d5c832100",
+  "prompts": {},
+  "sessions": {
+    "s_d4134898a8c0bf": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9683b18d68e54869cdaa80",
+        "model": "kimi-k3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "session_id": "6a9683b18d68e54869cdaa80",
+        "tool_type": "builtin",
+        "external_session_id": "6a9683b18d68e54869cdaa80",
+        "source_scene": "agent",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "client_type": "ide",
+        "tool_use_id": "6a968ec58d68e54869cdac0f",
+        "dedupe_key": "6a9683b18d68e54869cdaa80:6a968ec58d68e54869cdac0f:afterEdit:743796df",
+        "edit_kind": "file_edit",
+        "operation_id": "6a968ec58d68e54869cdac0f"
+      }
+    }
+  }
+}
