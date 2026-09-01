@@ -1,0 +1,35 @@
+tests/ut/distributed/ascend_store/test_backend.py
+  s_d4134898a8c0bf::t_8a1d9e08c3ae54 635-748
+  s_d4134898a8c0bf::t_dc9218c5f9a706 27,31-36,634
+tests/ut/distributed/ascend_store/_mock_deps.py
+  s_d4134898a8c0bf::t_cce9ba7aefce17 457-459
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "5b43d7617e107b214975b984d2f7ded9de5151d9",
+  "prompts": {},
+  "sessions": {
+    "s_d4134898a8c0bf": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9683b18d68e54869cdaa80",
+        "model": "kimi-k3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "edit_kind": "file_edit",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "external_session_id": "6a9683b18d68e54869cdaa80",
+        "tool_type": "builtin",
+        "operation_id": "6a968bfc8d68e54869cdab9d",
+        "dedupe_key": "6a9683b18d68e54869cdaa80:6a968bfc8d68e54869cdab9d:afterEdit:360faa7c",
+        "client_type": "ide",
+        "session_id": "6a9683b18d68e54869cdaa80",
+        "source_scene": "agent",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_use_id": "6a968bfc8d68e54869cdab9d"
+      }
+    }
+  }
+}
