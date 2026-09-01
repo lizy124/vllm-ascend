@@ -1,0 +1,56 @@
+tests/ut/distributed/ascend_store/test_backend.py
+  s_55cc72a99389c8::t_116b0c2718d39a 61-63,69-78
+tests/ut/distributed/ascend_store/test_pool_worker.py
+  s_55cc72a99389c8::t_10c06ece4fbac2 1241
+  s_55cc72a99389c8::t_00df3b532c5792 965
+tests/ut/distributed/ascend_store/test_gva_protocol.py
+  s_55cc72a99389c8::t_24af1bc2fb7a68 30
+  s_55cc72a99389c8::t_7292a9d9dac580 49-52,69-81
+tests/ut/distributed/ascend_store/test_pool_scheduler.py
+  s_55cc72a99389c8::t_7a019e48e0cb21 140-143
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/__init__.py
+  s_55cc72a99389c8::t_feb17d9e2e4560 27-28
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/layerwise_cache_layout.py
+  s_55cc72a99389c8::t_b2dd38e897808c 108
+  s_55cc72a99389c8::t_1f6b6f70516003 18,77-80,109-113
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/gva_protocol.py
+  s_55cc72a99389c8::t_8ad7d9450b1142 33-47
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py
+  s_55cc72a99389c8::t_6b7c7fb7fb3da3 28,164-170,321
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_55cc72a99389c8::t_ae896a87656115 34,159-165,1121,1136
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "07831a2a911e0d42e5beda392fbbd9ee0c77dd1a",
+  "prompts": {},
+  "humans": {
+    "h_3eaf4948cd6ab4": {
+      "author": "lizy124 <1950471827@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_55cc72a99389c8": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a923a118d68e54869cd9538",
+        "model": "kimi-k3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "runtime_client": "trae-tob-git-ai",
+        "session_id": "6a923a118d68e54869cd9538",
+        "tool_use_id": "6a9648e68d68e54869cda526",
+        "edit_kind": "file_edit",
+        "source_scene": "agent",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "external_session_id": "6a923a118d68e54869cd9538",
+        "operation_id": "6a9648e68d68e54869cda526",
+        "dedupe_key": "6a923a118d68e54869cd9538:6a9648e68d68e54869cda526:afterEdit:4dc3b41a",
+        "client_type": "ide",
+        "tool_type": "builtin"
+      }
+    }
+  }
+}
