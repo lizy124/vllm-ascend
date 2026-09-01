@@ -1,0 +1,32 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/__init__.py
+  s_d4134898a8c0bf::t_76563bb989dc4d 17-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "63be9e03b2f7a5e2af6bc13bad6617a817da7d8c",
+  "prompts": {},
+  "sessions": {
+    "s_d4134898a8c0bf": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9683b18d68e54869cdaa80",
+        "model": "kimi-k3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "edit_kind": "file_edit",
+        "external_session_id": "6a9683b18d68e54869cdaa80",
+        "source_scene": "agent",
+        "session_id": "6a9683b18d68e54869cdaa80",
+        "tool_use_id": "6a9694a68d68e54869cdacdc",
+        "client_type": "ide",
+        "tool_type": "builtin",
+        "dedupe_key": "6a9683b18d68e54869cdaa80:6a9694a68d68e54869cdacdc:afterEdit:0435ce65",
+        "runtime_client": "trae-tob-git-ai",
+        "operation_id": "6a9694a68d68e54869cdacdc"
+      }
+    }
+  }
+}

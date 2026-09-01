@@ -1,0 +1,19 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/gva_protocol.py
+  s_55cc72a99389c8::t_d3185ecce1e85f 17,19-22,25-30,32,36,38-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "108a8d8a9d06bedb32e8d84f42f8d50f2327f82c",
+  "prompts": {},
+  "sessions": {
+    "s_55cc72a99389c8": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a923a118d68e54869cd9538",
+        "model": "kimi-k3__max"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    }
+  }
+}

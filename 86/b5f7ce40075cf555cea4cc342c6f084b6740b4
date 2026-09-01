@@ -1,0 +1,19 @@
+tests/ut/distributed/ascend_store/test_layerwise_cache_layout.py
+  s_55cc72a99389c8::t_fabfe0901c560e 19,170,195-198,200-202
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "86b5f7ce40075cf555cea4cc342c6f084b6740b4",
+  "prompts": {},
+  "sessions": {
+    "s_55cc72a99389c8": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a923a118d68e54869cd9538",
+        "model": "kimi-k3__max"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    }
+  }
+}

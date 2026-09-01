@@ -1,0 +1,35 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "0aaacdb2beca8c09f89a0b610efab7d789aa440e",
+  "prompts": {},
+  "humans": {
+    "h_3eaf4948cd6ab4": {
+      "author": "lizy124 <1950471827@qq.com>"
+    }
+  },
+  "sessions": {
+    "s_55cc72a99389c8": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a923a118d68e54869cd9538",
+        "model": "kimi-k3"
+      },
+      "human_author": null,
+      "custom_attributes": {
+        "external_session_id": "6a923a118d68e54869cd9538",
+        "operation_id": "6a964ed28d68e54869cda592",
+        "runtime_client": "trae-tob-git-ai",
+        "tool_use_id": "6a964ed28d68e54869cda592",
+        "source_scene": "agent",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "client_type": "ide",
+        "edit_kind": "file_edit",
+        "dedupe_key": "6a923a118d68e54869cd9538:6a964ed28d68e54869cda592:afterEdit:7e783e2f",
+        "session_id": "6a923a118d68e54869cd9538",
+        "tool_type": "builtin"
+      }
+    }
+  }
+}

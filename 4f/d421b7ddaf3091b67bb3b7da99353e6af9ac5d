@@ -1,0 +1,76 @@
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_scheduler.py
+  s_d4134898a8c0bf::t_9e01c566793c6f 197
+  s_d4134898a8c0bf::t_435a2ac1548836 312-314,321
+  s_d4134898a8c0bf::t_57497807ea40c6 329
+  s_d4134898a8c0bf::t_35740a1d3e8458 169
+  s_d4134898a8c0bf::t_d4ca24010c6ce2 476,478
+  s_55cc72a99389c8::t_3f06171379a1f7 351
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/backend/__init__.py
+  s_d4134898a8c0bf::t_7881efbda3c953 25-29
+  s_d4134898a8c0bf::t_a3da3205c0f410 39-45,47-48,52
+tests/ut/distributed/ascend_store/test_pool_worker.py
+  s_d4134898a8c0bf::t_9b7903a705ec43 1419
+  s_d4134898a8c0bf::t_6404865563b24c 1434
+  s_d4134898a8c0bf::t_fbcc57c22a4bdc 996,1000,1004
+  s_d4134898a8c0bf::t_d3fae9e2a454e2 1387
+  s_d4134898a8c0bf::t_f766172cec4e8a 255
+tests/ut/distributed/ascend_store/test_pool_scheduler.py
+  s_d4134898a8c0bf::t_3b30566c21108a 824
+  s_d4134898a8c0bf::t_d679bc8daf40be 146
+  s_d4134898a8c0bf::t_39dff2b48793b9 794-795,799-800,804
+vllm_ascend/distributed/kv_transfer/kv_pool/ascend_store/pool_worker.py
+  s_d4134898a8c0bf::t_274d5f5aa2aa11 1111-1113,1119
+  s_d4134898a8c0bf::t_1d30b62eac0f73 1168
+  s_d4134898a8c0bf::t_a43481f7bf9ce6 1209
+  s_d4134898a8c0bf::t_6d28c659499f03 472
+  s_d4134898a8c0bf::t_4f345687c5f7fa 1334
+  s_d4134898a8c0bf::t_eaa9f2420d6c85 1221
+  s_d4134898a8c0bf::t_68b55621549c9d 381
+  s_d4134898a8c0bf::t_15b301284676c0 1384
+  s_d4134898a8c0bf::t_e15bc8cdec2794 423
+  s_d4134898a8c0bf::t_807316d28496a0 525
+  s_d4134898a8c0bf::t_1630cf270656c6 487
+  s_d4134898a8c0bf::t_0cd151d1799329 830
+  s_d4134898a8c0bf::t_888ec0cadbc52d 162
+  s_d4134898a8c0bf::t_3024b8bd6cf2e0 1134
+  s_d4134898a8c0bf::t_96df94c4038030 1233
+tests/ut/distributed/ascend_store/test_backend.py
+  s_d4134898a8c0bf::t_f0ce7df733423b 62-64,69-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "4fd421b7ddaf3091b67bb3b7da99353e6af9ac5d",
+  "prompts": {},
+  "sessions": {
+    "s_55cc72a99389c8": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a923a118d68e54869cd9538",
+        "model": "kimi-k3__max"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    },
+    "s_d4134898a8c0bf": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9683b18d68e54869cdaa80",
+        "model": "kimi-k3"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>",
+      "custom_attributes": {
+        "runtime_client": "trae-tob-git-ai",
+        "operation_id": "6a968aeb8d68e54869cdab79",
+        "tool_id": "icube:applyChatSnapshotPatch",
+        "edit_kind": "file_edit",
+        "tool_use_id": "6a968aeb8d68e54869cdab79",
+        "session_id": "6a9683b18d68e54869cdaa80",
+        "source_scene": "agent",
+        "dedupe_key": "6a9683b18d68e54869cdaa80:6a968aeb8d68e54869cdab79:afterEdit:359ee443",
+        "tool_type": "builtin",
+        "client_type": "ide",
+        "external_session_id": "6a9683b18d68e54869cdaa80"
+      }
+    }
+  }
+}
