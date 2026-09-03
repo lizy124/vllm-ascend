@@ -1,0 +1,19 @@
+sef_validation/pool_code_refactor/delivery_self_test_report.md
+  s_2525b9f7c9e01e::t_8cc8820ddb68a1 1-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "dd0f311a503132b629d5649995a9e8a31f788d6b",
+  "prompts": {},
+  "sessions": {
+    "s_2525b9f7c9e01e": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a991d6d8d68e54869cdb807",
+        "model": "deepseek_v4_flash_official__max"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    }
+  }
+}
