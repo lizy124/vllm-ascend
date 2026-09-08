@@ -1,0 +1,73 @@
+ascend_project/Layerwise-Pooling-Optimization/baseline/data/hbm_baseline_128k.json
+  s_e415c93cad1b2c::t_cf6f77f06f9d45 1-43
+ascend_project/Layerwise-Pooling-Optimization/baseline/data/hbm_baseline_64k.json
+  s_e415c93cad1b2c::t_921b3335258c92 1-57
+ascend_project/Layerwise-Pooling-Optimization/baseline/data/res_multi_128k.json
+  s_e415c93cad1b2c::t_e63c709a6f13cb 1-43
+ascend_project/Layerwise-Pooling-Optimization/baseline/data/res_multi_64k.json
+  s_e415c93cad1b2c::t_d120f9bc120b24 1-57
+ascend_project/Layerwise-Pooling-Optimization/local_run_metrics_ut.py
+  s_85fa35c0f08925::t_7d65a7f63513eb 1-68
+ascend_project/vLLM-Observability/PR1_code_walkthrough.md
+  s_85fa35c0f08925::t_c2cc61f6dd4057 1-471
+ascend_project/vLLM-Observability/PR1_description.md
+  s_85fa35c0f08925::t_9359deac23ede1 1-62
+ascend_project/vLLM-Observability/PR1_kv_pool_metrics_dev_plan.md
+  s_85fa35c0f08925::t_add40a0b224d24 1-191
+ascend_project/vLLM-Observability/g-review-report.md
+  s_85fa35c0f08925::t_66fc6e6b653fb4 1-437
+ascend_project/vLLM-Observability/g-validation-report.md
+  s_85fa35c0f08925::t_3d709a93fe1b7c 1-130
+ascend_project/vLLM-Observability/requirements_analysis.md
+  s_85fa35c0f08925::t_5d86d847cdc1af 1-135
+ascend_project/vLLM-Observability/scripts_165/check_env.sh
+  s_85fa35c0f08925::t_1464570e5bfa99 1-15
+ascend_project/vLLM-Observability/scripts_165/check_repos.sh
+  s_85fa35c0f08925::t_ab7f85d2e0e0f1 1-13
+ascend_project/vLLM-Observability/scripts_165/check_smoke_env.sh
+  s_85fa35c0f08925::t_d675a70183f6df 1-17
+ascend_project/vLLM-Observability/scripts_165/ci.md
+  s_85fa35c0f08925::t_58354baf03cd51 1-25
+ascend_project/vLLM-Observability/scripts_165/download_model.py
+  s_85fa35c0f08925::t_b76bbfccc7bbb8 1-14
+ascend_project/vLLM-Observability/scripts_165/probe_models.sh
+  s_85fa35c0f08925::t_d213aaf0e6c560 1-11
+ascend_project/vLLM-Observability/scripts_165/probe_models2.sh
+  s_85fa35c0f08925::t_8796778719b620 1-13
+ascend_project/vLLM-Observability/scripts_165/probe_smoke_deps.sh
+  s_85fa35c0f08925::t_126a4c8eb2c2d9 1-16
+ascend_project/vLLM-Observability/scripts_165/rerun_ut.sh
+  s_85fa35c0f08925::t_64e8eb35371d93 1-9
+ascend_project/vLLM-Observability/scripts_165/run_failed_ut.sh
+  s_85fa35c0f08925::t_035e705cc1907c 1-6
+ascend_project/vLLM-Observability/scripts_165/run_ut.sh
+  s_85fa35c0f08925::t_c17816b45af260 1-12
+ascend_project/vLLM-Observability/scripts_165/smoke_metric_pipeline.py
+  s_85fa35c0f08925::t_cc697ac428878a 1-198
+ascend_project/vLLM-Observability/todo-fixes-and-verifications.md
+  s_85fa35c0f08925::t_072aa2ed20992b 1-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.2",
+  "base_commit_sha": "240186a944feddabd31ebb24d449d00fbc5e47a0",
+  "prompts": {},
+  "sessions": {
+    "s_85fa35c0f08925": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a98d3fa8d68e54869cdb11c",
+        "model": "deepseek_v4_flash_official__max"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    },
+    "s_e415c93cad1b2c": {
+      "agent_id": {
+        "tool": "trae",
+        "id": "6a9a89fd8d68e54869cdbc22",
+        "model": "deepseek_v4_flash_official__max"
+      },
+      "human_author": "lizy124 <1950471827@qq.com>"
+    }
+  }
+}
