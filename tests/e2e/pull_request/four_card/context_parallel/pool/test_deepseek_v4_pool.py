@@ -7,9 +7,10 @@ The upstream DSA-PCP acceptance case in
 rebuilds both legs itself with TP2 x PCP2 + EP, so the control leg is our own
 bare engine instead of the online test.
 
-Acceptance is recorded, not gated: the upstream floors were calibrated at
-``max_num_seqs=4``, while the perf segment now runs 32 requests at concurrency
-16. Output prefixes, exact hit tokens, R4 and the A/B throughput gate remain.
+Acceptance is gated on both legs: the accuracy callback asserts per-position
+absolute floors, and ``run_pool_ab`` requires the pool leg to stay within 20%
+of the no-pool leg at every position. Output prefixes, exact hit tokens, R4 and
+the A/B throughput gate remain.
 """
 
 import os

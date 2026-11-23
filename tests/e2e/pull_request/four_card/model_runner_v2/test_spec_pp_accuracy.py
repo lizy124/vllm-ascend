@@ -50,7 +50,7 @@ from tests.e2e.pull_request.kv_pool_watch import (
     run_pool_hit_sequence,
 )
 
-# P5 runner uses the RoCE path; fabric-mem is unavailable on this runner.
+# This DSV4-Flash DSpark PP2xTP2 case uses the RoCE path; fabric-mem is unavailable on this runner.
 os.environ["ASCEND_ENABLE_USE_FABRIC_MEM"] = "0"
 os.environ["HCCL_INTRA_ROCE_ENABLE"] = "1"
 
@@ -87,7 +87,7 @@ def _build_mooncake_pool_config() -> MooncakeKVPoolConfig:
         config={
             "metadata_server": "P2PHANDSHAKE",
             "protocol": "ascend",
-            "global_segment_size": "2GB",  # Not final; tune after measurement.
+            "global_segment_size": "5GB",
             "local_buffer_size": "5GB",
             "preferred_segment": False,
             "prefer_alloc_in_same_node": True,

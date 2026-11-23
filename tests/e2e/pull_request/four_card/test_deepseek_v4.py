@@ -37,7 +37,7 @@ from tests.e2e.pull_request.kv_pool_watch import (
 
 os.environ["PYTORCH_NPU_ALLOC_CONF"] = "expandable_segments:True"
 os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
-# P1 runner uses the RoCE path; fabric-mem is unavailable.
+# This DSV4-Flash TP4+EP case uses the RoCE path; fabric-mem is unavailable.
 os.environ["ASCEND_ENABLE_USE_FABRIC_MEM"] = "0"
 os.environ["HCCL_INTRA_ROCE_ENABLE"] = "1"
 
@@ -70,7 +70,7 @@ def _build_mooncake_pool_config() -> MooncakeKVPoolConfig:
         config={
             "metadata_server": "P2PHANDSHAKE",
             "protocol": "ascend",
-            "global_segment_size": "2GB",  # Not final; tune after measurement.
+            "global_segment_size": "5GB",
             "local_buffer_size": "5GB",
             "preferred_segment": False,
             "prefer_alloc_in_same_node": True,
